@@ -1,0 +1,127 @@
+package com.example.sehat.data
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.sehat.data.dao.*
+import com.example.sehat.data.entity.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+@Database(
+    entities = [
+        Patient::class,
+        CareEpisode::class,
+        Symptom::class,
+        Vitals::class,
+        ScreeningTest::class,
+        TriageResult::class,
+        Referral::class,
+        Appointment::class,
+        Medicine::class,
+        FollowUpTask::class,
+        SyncQueue::class
+    ],
+    version = 1,
+    exportSchema = false
+)
+abstract class SehatDatabase : RoomDatabase() {
+
+    abstract fun patientDao(): PatientDao
+    abstract fun careEpisodeDao(): CareEpisodeDao
+    abstract fun symptomDao(): SymptomDao
+    abstract fun vitalsDao(): VitalsDao
+    abstract fun screeningTestDao(): ScreeningTestDao
+    abstract fun triageResultDao(): TriageResultDao
+    abstract fun referralDao(): ReferralDao
+    abstract fun appointmentDao(): AppointmentDao
+    abstract fun medicineDao(): MedicineDao
+    abstract fun followUpTaskDao(): FollowUpTaskDao
+    abstract fun syncQueueDao(): SyncQueueDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: SehatDatabase? = null
+
+        fun get(context: Context): SehatDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    SehatDatabase::class.java,
+                    "sehat_db"
+                )
+                .addCallback(DatabaseCallback(context))
+                .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+
+    private class DatabaseCallback(private val context: Context) : RoomDatabase.Callback() {
+        override fun onCreate(db: SupportSQLiteDatabase) {
+            super.onCreate(db)
+            CoroutineScope(Dispatchers.IO).launch {
+                populateSampleData(get(context))
+            }
+        }
+    }
+}
+
+private suspend fun populateSampleData(db: SehatDatabase) {
+    // 1. Initial Patients
+    val patients = listOf(
+        Patient(abhaId = "1234 5678 9012", name = "Sita Devi", age = 34, gender = "Female", village = "Khed", mobile = "9876543210"),
+        Patient(abhaId = "9876 5432 1098", name = "Ramesh Pawar", age = 52, gender = "Male", village = "Khed", mobile = "9876500001"),
+        Patient(abhaId = "1111 2222 3333", name = "Lata Shinde", age = 28, gender = "Female", village = "Nandgaon", mobile = "9876500002")
+    )
+    db.patientDao().insertAll(patients)
+
+    // 2. Initial Medicines
+    val medicines = listOf(
+        Medicine(name = "Paracetamol 500 mg", form = "Tablet", facility = "AAM-SHC Khed", stockCount = 500, status = "In Stock"),
+        Medicine(name = "Amoxicillin 500 mg", form = "Capsule", facility = "PHC Khed", stockCount = 120, status = "In Stock"),
+        Medicine(name = "ORS", form = "Sachet", facility = "AAM-SHC Khed", stockCount = 200, status = "In Stock"),
+        Medicine(name = "Iron Tablets (IFA)", form = "Tablet", facility = "Sub-Centre Nandgaon", stockCount = 40, status = "Low Stock"),
+        Medicine(name = "Cetirizine 10 mg", form = "Tablet", facility = "PHC Khed", stockCount = 0, status = "Unavailable")
+    )
+    db.medicineDao().insertAll(medicines)
+
+    // 3. Initial Follow-up Tasks
+    val tasks = listOf(
+        FollowUpTask(
+            episodeId = 1,
+            patientAbhaId = "1234 5678 9012",
+            patientName = "Sita Devi",
+            village = "Khed",
+            taskTitle = "Post-treatment follow-up",
+            dueDate = "19 Sep 2025",
+            status = "Pending",
+            checklistJson = "[\"Medicine taken as prescribed\",\"Symptoms improved\",\"Any side effects\",\"Measure vital signs (BP / Sugar / Weight)\",\"Add follow-up notes\"]"
+        ),
+        FollowUpTask(
+            episodeId = 2,
+            patientAbhaId = "9876 5432 1098",
+            patientName = "Ramesh Pawar",
+            village = "Khed",
+            taskTitle = "Hypertension follow-up",
+            dueDate = "21 Sep 2025",
+            status = "Pending",
+            checklistJson = "[\"Measure Blood Pressure\",\"Check adherence to BP medicine\",\"Symptom check\"]"
+        ),
+        FollowUpTask(
+            episodeId = 3,
+            patientAbhaId = "1111 2222 3333",
+            patientName = "Lata Shinde",
+            village = "Nandgaon",
+            taskTitle = "ANC follow-up",
+            dueDate = "22 Sep 2025",
+            status = "Completed",
+            checklistJson = "[\"Check weight and blood pressure\",\"Check hemoglobin report\",\"Distribute IFA tablets\"]"
+        )
+    )
+    db.followUpTaskDao().insertAll(tasks)
+}

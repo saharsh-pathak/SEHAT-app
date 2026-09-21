@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.example.sehat.app-debug-64:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.example.sehat.app-main-66:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.example.sehat.app-debug-64:/drawable_sehat_logo.png.flat",
+        "source": "com.example.sehat.app-main-66:/drawable/sehat_logo.png"
+    },
+    {
+        "merged": "com.example.sehat.app-debug-64:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.sehat.app-main-66:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.sehat.app-debug-64:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.example.sehat.app-main-66:/drawable/ic_launcher_background.xml"
+    }
+]
