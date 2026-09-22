@@ -61,3 +61,13 @@ dependencies {
     testImplementation("org.robolectric:robolectric:4.17")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
+
+tasks.register<Copy>("copyDebugApk") {
+    from(layout.buildDirectory.dir("outputs/apk/debug"))
+    into(rootProject.file("app/build/outputs/apk/debug"))
+    include("*.apk")
+}
+
+afterEvaluate {
+    tasks.findByName("assembleDebug")?.finalizedBy("copyDebugApk")
+}
