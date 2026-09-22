@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.example.sehat.ui.screens.*
 import com.example.sehat.viewmodel.*
 
@@ -45,7 +46,10 @@ fun SehatNavGraph(
         startDestination = SehatRoutes.DASHBOARD
     ) {
         // Screen 1: Dashboard
-        composable(SehatRoutes.DASHBOARD) {
+        composable(
+            route = SehatRoutes.DASHBOARD,
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://dashboard" })
+        ) {
             val pendingCount by dashboardViewModel.pendingFollowUpsCount.collectAsState()
             DashboardScreen(
                 pendingFollowUpsCount = pendingCount,
@@ -58,7 +62,10 @@ fun SehatNavGraph(
         }
 
         // Screen 2: Search Patient
-        composable(SehatRoutes.SEARCH_PATIENT) {
+        composable(
+            route = SehatRoutes.SEARCH_PATIENT,
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://search_patient" })
+        ) {
             val query by patientViewModel.searchQuery.collectAsState()
             val patients by patientViewModel.patients.collectAsState()
 
@@ -81,7 +88,8 @@ fun SehatNavGraph(
         // Screen: Patient Details
         composable(
             route = SehatRoutes.PATIENT_DETAILS,
-            arguments = listOf(navArgument("abhaId") { type = NavType.StringType })
+            arguments = listOf(navArgument("abhaId") { type = NavType.StringType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://patient_details/{abhaId}" })
         ) { backStackEntry ->
             val abhaId = backStackEntry.arguments?.getString("abhaId") ?: ""
             val patientState by patientDetailsViewModel.patientState.collectAsState()
@@ -109,7 +117,8 @@ fun SehatNavGraph(
         // Screen 3: Symptom Collection
         composable(
             route = SehatRoutes.SYMPTOMS,
-            arguments = listOf(navArgument("abhaId") { type = NavType.StringType })
+            arguments = listOf(navArgument("abhaId") { type = NavType.StringType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://symptoms/{abhaId}" })
         ) { backStackEntry ->
             val abhaId = backStackEntry.arguments?.getString("abhaId") ?: ""
             val episodeState by careEpisodeViewModel.state.collectAsState()
@@ -126,7 +135,8 @@ fun SehatNavGraph(
         // Screen 4: Basic Screening Tests
         composable(
             route = SehatRoutes.BASIC_TESTS,
-            arguments = listOf(navArgument("episodeId") { type = NavType.LongType })
+            arguments = listOf(navArgument("episodeId") { type = NavType.LongType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://basic_tests/{episodeId}" })
         ) { backStackEntry ->
             val episodeId = backStackEntry.arguments?.getLong("episodeId") ?: 0L
 
@@ -144,7 +154,8 @@ fun SehatNavGraph(
         // Screen 5: Severity Assessment / Triage Result
         composable(
             route = SehatRoutes.TRIAGE_RESULT,
-            arguments = listOf(navArgument("episodeId") { type = NavType.LongType })
+            arguments = listOf(navArgument("episodeId") { type = NavType.LongType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://triage_result/{episodeId}" })
         ) { backStackEntry ->
             val episodeState by careEpisodeViewModel.state.collectAsState()
 
@@ -163,7 +174,8 @@ fun SehatNavGraph(
         // Screen 6: Patient Timeline
         composable(
             route = SehatRoutes.PATIENT_TIMELINE,
-            arguments = listOf(navArgument("abhaId") { type = NavType.StringType })
+            arguments = listOf(navArgument("abhaId") { type = NavType.StringType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://patient_timeline/{abhaId}" })
         ) { backStackEntry ->
             val abhaId = backStackEntry.arguments?.getString("abhaId") ?: ""
             val episodeState by careEpisodeViewModel.state.collectAsState()
@@ -189,7 +201,8 @@ fun SehatNavGraph(
             arguments = listOf(
                 navArgument("episodeId") { type = NavType.LongType },
                 navArgument("abhaId") { type = NavType.StringType }
-            )
+            ),
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://referral_management/{episodeId}/{abhaId}" })
         ) { backStackEntry ->
             val episodeId = backStackEntry.arguments?.getLong("episodeId") ?: 0L
             val abhaId = backStackEntry.arguments?.getString("abhaId") ?: ""
@@ -208,7 +221,8 @@ fun SehatNavGraph(
         // Screen 8: Appointment Confirmation
         composable(
             route = SehatRoutes.APPOINTMENT_CONFIRMATION,
-            arguments = listOf(navArgument("referralId") { type = NavType.LongType })
+            arguments = listOf(navArgument("referralId") { type = NavType.LongType }),
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://appointment_confirmation/{referralId}" })
         ) {
             val appointment by referralViewModel.createdAppointment.collectAsState()
 
@@ -223,23 +237,32 @@ fun SehatNavGraph(
         }
 
         // Screen 9: Medicine Availability
-        composable(SehatRoutes.MEDICINE_AVAILABILITY) {
+        composable(
+            route = SehatRoutes.MEDICINE_AVAILABILITY,
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://medicine_availability" })
+        ) {
             val query by medicineViewModel.searchQuery.collectAsState()
-            val filter by medicineViewModel.selectedFilter.collectAsState()
             val medicines by medicineViewModel.medicines.collectAsState()
+            val selectedMed by medicineViewModel.selectedMedicine.collectAsState()
+            val facilityStock by medicineViewModel.facilityStock.collectAsState()
 
             MedicineAvailabilityScreen(
                 searchQuery = query,
-                selectedFilter = filter,
                 medicines = medicines,
+                selectedMedicine = selectedMed,
+                facilityStock = facilityStock,
                 onQueryChange = { medicineViewModel.updateSearch(it) },
-                onFilterSelect = { medicineViewModel.updateFilter(it) },
+                onMedicineClick = { medicineViewModel.selectMedicine(it) },
+                onDismissSheet = { medicineViewModel.selectMedicine(null) },
                 onBackClick = { navController.popBackStack() }
             )
         }
 
         // Screen 10: Follow-up Tasks
-        composable(SehatRoutes.FOLLOW_UP_TASKS) {
+        composable(
+            route = SehatRoutes.FOLLOW_UP_TASKS,
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://follow_up_tasks" })
+        ) {
             val selectedTab by followUpViewModel.selectedTab.collectAsState()
             val tasks by followUpViewModel.tasks.collectAsState()
 
@@ -253,7 +276,10 @@ fun SehatNavGraph(
         }
 
         // Screen 11: Language Selection
-        composable(SehatRoutes.LANGUAGE_SELECTION) {
+        composable(
+            route = SehatRoutes.LANGUAGE_SELECTION,
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://language_selection" })
+        ) {
             val language by settingsViewModel.selectedLanguage.collectAsState()
 
             LanguageSelectionScreen(

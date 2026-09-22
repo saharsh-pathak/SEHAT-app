@@ -80,13 +80,50 @@ private suspend fun populateSampleData(db: SehatDatabase) {
     )
     db.patientDao().insertAll(patients)
 
-    // 2. Initial Medicines
+    // 2. Initial Medicines (Distributed across nearby PHCs)
     val medicines = listOf(
-        Medicine(name = "Paracetamol 500 mg", form = "Tablet", facility = "AAM-SHC Khed", stockCount = 500, status = "In Stock"),
+        // Paracetamol 500 mg
+        Medicine(name = "Paracetamol 500 mg", form = "Tablet", facility = "PHC Khed", stockCount = 500, status = "In Stock"),
+        Medicine(name = "Paracetamol 500 mg", form = "Tablet", facility = "PHC Chakan", stockCount = 320, status = "In Stock"),
+        Medicine(name = "Paracetamol 500 mg", form = "Tablet", facility = "PHC Alandi", stockCount = 210, status = "In Stock"),
+        Medicine(name = "Paracetamol 500 mg", form = "Tablet", facility = "PHC Nandgaon", stockCount = 80, status = "In Stock"),
+
+        // Amoxicillin 500 mg
         Medicine(name = "Amoxicillin 500 mg", form = "Capsule", facility = "PHC Khed", stockCount = 120, status = "In Stock"),
-        Medicine(name = "ORS", form = "Sachet", facility = "AAM-SHC Khed", stockCount = 200, status = "In Stock"),
-        Medicine(name = "Iron Tablets (IFA)", form = "Tablet", facility = "Sub-Centre Nandgaon", stockCount = 40, status = "Low Stock"),
-        Medicine(name = "Cetirizine 10 mg", form = "Tablet", facility = "PHC Khed", stockCount = 0, status = "Unavailable")
+        Medicine(name = "Amoxicillin 500 mg", form = "Capsule", facility = "PHC Chakan", stockCount = 95, status = "In Stock"),
+        Medicine(name = "Amoxicillin 500 mg", form = "Capsule", facility = "PHC Alandi", stockCount = 60, status = "In Stock"),
+
+        // Cough Syrup
+        Medicine(name = "Cough Syrup", form = "Syrup", facility = "PHC Khed", stockCount = 65, status = "In Stock"),
+        Medicine(name = "Cough Syrup", form = "Syrup", facility = "PHC Alandi", stockCount = 40, status = "In Stock"),
+        Medicine(name = "Cough Syrup", form = "Syrup", facility = "PHC Nandgaon", stockCount = 25, status = "In Stock"),
+
+        // Cetirizine 10 mg
+        Medicine(name = "Cetirizine 10 mg", form = "Tablet", facility = "PHC Chakan", stockCount = 85, status = "In Stock"),
+        Medicine(name = "Cetirizine 10 mg", form = "Tablet", facility = "PHC Khed", stockCount = 50, status = "In Stock"),
+        Medicine(name = "Cetirizine 10 mg", form = "Tablet", facility = "PHC Alandi", stockCount = 30, status = "In Stock"),
+
+        // Iron Tablets (IFA)
+        Medicine(name = "Iron Tablets (IFA)", form = "Tablet", facility = "PHC Nandgaon", stockCount = 140, status = "In Stock"),
+        Medicine(name = "Iron Tablets (IFA)", form = "Tablet", facility = "PHC Khed", stockCount = 100, status = "In Stock"),
+        Medicine(name = "Iron Tablets (IFA)", form = "Tablet", facility = "PHC Chakan", stockCount = 75, status = "In Stock"),
+
+        // ORS
+        Medicine(name = "ORS", form = "Sachet", facility = "PHC Khed", stockCount = 200, status = "In Stock"),
+        Medicine(name = "ORS", form = "Sachet", facility = "PHC Chakan", stockCount = 150, status = "In Stock"),
+        Medicine(name = "ORS", form = "Sachet", facility = "PHC Nandgaon", stockCount = 110, status = "In Stock"),
+
+        // Azithromycin 500 mg
+        Medicine(name = "Azithromycin 500 mg", form = "Tablet", facility = "PHC Alandi", stockCount = 95, status = "In Stock"),
+        Medicine(name = "Azithromycin 500 mg", form = "Tablet", facility = "PHC Khed", stockCount = 70, status = "In Stock"),
+
+        // Antacid Syrup
+        Medicine(name = "Antacid Syrup", form = "Syrup", facility = "PHC Alandi", stockCount = 40, status = "In Stock"),
+        Medicine(name = "Antacid Syrup", form = "Syrup", facility = "PHC Khed", stockCount = 35, status = "In Stock"),
+
+        // Omeprazole 20 mg
+        Medicine(name = "Omeprazole 20 mg", form = "Capsule", facility = "PHC Chakan", stockCount = 110, status = "In Stock"),
+        Medicine(name = "Omeprazole 20 mg", form = "Capsule", facility = "PHC Khed", stockCount = 80, status = "In Stock")
     )
     db.medicineDao().insertAll(medicines)
 

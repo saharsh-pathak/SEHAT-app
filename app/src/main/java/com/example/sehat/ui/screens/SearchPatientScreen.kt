@@ -1,25 +1,23 @@
 package com.example.sehat.ui.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sehat.data.entity.Patient
 import com.example.sehat.ui.components.PatientCard
-import com.example.sehat.ui.components.SehatButton
-import com.example.sehat.ui.components.SehatTopBar
 import com.example.sehat.ui.theme.*
 
 @Composable
@@ -31,185 +29,123 @@ fun SearchPatientScreen(
     onCreateAbha: (name: String, age: Int, gender: String, village: String, aadhaar: String, mobile: String) -> Unit,
     onBackClick: () -> Unit
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) } // 0: Search Existing, 1: Create New
+    val displayPatients = if (patients.isNotEmpty()) patients else listOf(
+        Patient(abhaId = "1234 5678 9012", name = "Sita Devi", age = 34, gender = "Female", village = "Khed"),
+        Patient(abhaId = "9876 5432 1098", name = "Ramesh Pawar", age = 52, gender = "Male", village = "Khed"),
+        Patient(abhaId = "1111 2222 3333", name = "Lata Shinde", age = 28, gender = "Female", village = "Nandgaon"),
+        Patient(abhaId = "9877 5658 4983", name = "SAHARSH", age = 19, gender = "Male", village = "Khed")
+    )
 
     Scaffold(
-        topBar = {
-            SehatTopBar(
-                title = "Search for Patient",
-                onBackClick = onBackClick
-            )
-        },
         containerColor = CreamBackground
     ) { innerPadding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp)
         ) {
-            // Tab Toggle
-            Row(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-                    .background(CreamSurface, shape = RoundedCornerShape(10.dp))
-                    .padding(4.dp)
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
             ) {
-                Button(
-                    onClick = { selectedTab = 0 },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedTab == 0) MaroonPrimary else Color.Transparent,
-                        contentColor = if (selectedTab == 0) Color.White else TextPrimary
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.weight(1f)
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Top Header Bar: Back Button + "Timeline"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaroonPrimary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "Search Existing",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (selectedTab == 0) Color.White else TextPrimary
+                        text = "Timeline",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaroonPrimary
                     )
                 }
-                Button(
-                    onClick = { selectedTab = 1 },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (selectedTab == 1) MaroonPrimary else Color.Transparent,
-                        contentColor = if (selectedTab == 1) Color.White else TextPrimary
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.weight(1f)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Section Header: "Timeline" (No "View all")
+                Text(
+                    text = "Timeline",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
+                )
+
+                // Patient Cards List
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 90.dp),
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    Text(
-                        "Create New",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = if (selectedTab == 1) Color.White else TextPrimary
-                    )
+                    items(displayPatients) { patient ->
+                        // Determine sync state: green tick for synced, gray tick for not synced
+                        val isSynced = patient.abhaId.endsWith("12") || patient.abhaId.endsWith("33")
+
+                        PatientCard(
+                            patient = patient,
+                            isSynced = isSynced,
+                            onClick = { onPatientSelect(patient) }
+                        )
+                    }
                 }
             }
 
-            if (selectedTab == 0) {
-                // Search Input Field
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onQueryChange,
-                    placeholder = { Text("Enter ABHA ID / Name / Mobile Number") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = MaroonPrimary) },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedBorderColor = MaroonPrimary
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                )
-
-                Text(
-                    text = "Recent Patients",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    items(patients) { patient ->
-                        PatientCard(patient = patient, onClick = { onPatientSelect(patient) })
-                    }
+            // Bottom Wave Decorative Background Banner
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp)
+                    .align(Alignment.BottomCenter)
+            ) {
+                val path = Path().apply {
+                    moveTo(0f, size.height * 0.4f)
+                    cubicTo(
+                        size.width * 0.35f, size.height * 0.1f,
+                        size.width * 0.65f, size.height * 0.7f,
+                        size.width, size.height * 0.3f
+                    )
+                    lineTo(size.width, size.height)
+                    lineTo(0f, size.height)
+                    close()
                 }
+                drawPath(path = path, color = Color(0xFF852A2A).copy(alpha = 0.85f))
 
-
-            } else {
-                // Create ABHA Form
-                var name by remember { mutableStateOf("") }
-                var age by remember { mutableStateOf("") }
-                var gender by remember { mutableStateOf("Female") }
-                var village by remember { mutableStateOf("Khed") }
-                var aadhaar by remember { mutableStateOf("") }
-                var mobile by remember { mutableStateOf("") }
-
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    item {
-                        OutlinedTextField(
-                            value = name, onValueChange = { name = it },
-                            label = { Text("Full Name") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = age, onValueChange = { age = it },
-                            label = { Text("Age") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = gender, onValueChange = { gender = it },
-                            label = { Text("Gender (Male/Female/Other)") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = village, onValueChange = { village = it },
-                            label = { Text("Village / Gram Panchayat") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = aadhaar, onValueChange = { aadhaar = it },
-                            label = { Text("Aadhaar Number (12 digits)") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    item {
-                        OutlinedTextField(
-                            value = mobile, onValueChange = { mobile = it },
-                            label = { Text("Mobile Number") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        SehatButton(
-                            text = "Create ABHA & Register",
-                            onClick = {
-                                if (name.isNotBlank()) {
-                                    onCreateAbha(name, age.toIntOrNull() ?: 30, gender, village, aadhaar, mobile)
-                                }
-                            }
-                        )
-                    }
+                val subPath = Path().apply {
+                    moveTo(0f, size.height * 0.6f)
+                    cubicTo(
+                        size.width * 0.4f, size.height * 0.3f,
+                        size.width * 0.7f, size.height * 0.8f,
+                        size.width, size.height * 0.5f
+                    )
+                    lineTo(size.width, size.height)
+                    lineTo(0f, size.height)
+                    close()
                 }
+                drawPath(path = subPath, color = Color(0xFFD7CCC8).copy(alpha = 0.5f))
             }
         }
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Preview(showBackground = true)
 @Composable
 private fun SearchPatientScreenPreview() {
     SehatTheme {
         SearchPatientScreen(
             searchQuery = "",
-            patients = listOf(
-                Patient(abhaId = "1234 5678 9012", name = "Sita Devi", age = 34, gender = "Female", village = "Khed"),
-                Patient(abhaId = "9876 5432 1098", name = "Ramesh Pawar", age = 52, gender = "Male", village = "Khed")
-            ),
+            patients = emptyList(),
             onQueryChange = {},
             onPatientSelect = {},
             onCreateAbha = { _, _, _, _, _, _ -> },

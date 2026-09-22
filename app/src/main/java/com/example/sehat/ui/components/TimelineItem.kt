@@ -36,6 +36,7 @@ fun TimelineItem(
         TimelineEventType.REFERRAL -> Icons.Default.LocalHospital
         TimelineEventType.HOSPITAL_ADMISSION -> Icons.Default.Hotel
         TimelineEventType.DISCHARGE -> Icons.Default.CheckCircle
+        else -> Icons.Default.Info
     }
 
     Row(
