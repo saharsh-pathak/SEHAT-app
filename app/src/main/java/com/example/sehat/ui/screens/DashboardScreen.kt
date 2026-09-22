@@ -47,11 +47,12 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(bottom = 36.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
+            item { Spacer(modifier = Modifier.height(2.dp)) }
 
-            // Top Header: Hamburger + Logo + Notifications
+            // Top Header: Hamburger + Logo
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -71,29 +72,12 @@ fun DashboardScreen(
                     Image(
                         painter = painterResource(id = R.drawable.sehat_logo),
                         contentDescription = "SEHAT Logo",
-                        modifier = Modifier.height(48.dp),
+                        modifier = Modifier.height(52.dp),
                         contentScale = ContentScale.Fit
                     )
 
-                    // Bell icon with badge dot
-                    Box {
-                        IconButton(onClick = { }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Notifications,
-                                contentDescription = "Notifications",
-                                tint = MaroonPrimary,
-                                modifier = Modifier.size(26.dp)
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(8.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFC5221F))
-                                .align(Alignment.TopEnd)
-                                .offset(x = (-8).dp, y = (8).dp)
-                        )
-                    }
+                    // Spacer to keep logo centered
+                    Spacer(modifier = Modifier.size(48.dp))
                 }
             }
 
@@ -105,25 +89,19 @@ fun DashboardScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
+                        Image(
+                            painter = painterResource(id = R.drawable.avatar_female_young),
+                            contentDescription = "Sunita Tai Avatar",
                             modifier = Modifier
                                 .size(50.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFFF7EBEB)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Person,
-                                contentDescription = null,
-                                tint = MaroonPrimary,
-                                modifier = Modifier.size(32.dp)
-                            )
-                        }
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text("Good Morning,", fontSize = 12.sp, color = TextSecondary)
                             Text("Sunita Tai", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = MaroonPrimary)
-                            Text("Medical Worker – Khed Block", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextSecondary)
+                            Text("Medical Worker – Khed Block", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color(0xFF4A443E))
                         }
                     }
 
@@ -168,7 +146,7 @@ fun DashboardScreen(
                             .padding(18.dp)
                     ) {
                         Text(
-                            text = "PATIENT TIMELINE & SCREENING",
+                            text = "START PATIENT SCREENING",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFE8C5C5),
@@ -176,20 +154,20 @@ fun DashboardScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Patient Timeline",
+                            text = "Search for Patient",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "View patient records, reports & sync status",
+                            text = "Enter ABHA ID, Mobile No. or Name",
                             fontSize = 12.sp,
                             color = Color(0xFFF3E5E5)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // White button inside maroon card
+                        // White Search Bar inside maroon card
                         Surface(
                             shape = CircleShape,
                             color = Color.White,
@@ -203,17 +181,16 @@ fun DashboardScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Timeline,
-                                    contentDescription = "Timeline",
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search",
                                     tint = MaroonPrimary,
                                     modifier = Modifier.size(22.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    text = "Open Patient Timeline",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaroonPrimary
+                                    text = "Search by ABHA ID / MOBILE NO. / NAME",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF6B635B)
                                 )
                             }
                         }
@@ -223,23 +200,12 @@ fun DashboardScreen(
 
             // Quick Actions Header
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Quick Actions",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaroonPrimary
-                    )
-                    Text(
-                        text = "For your daily work",
-                        fontSize = 12.sp,
-                        color = TextSecondary
-                    )
-                }
+                Text(
+                    text = "Quick Actions",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaroonPrimary
+                )
             }
 
             // Quick Actions 2x2 Grid
@@ -339,9 +305,9 @@ fun DashboardScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
-                                    .width(1.dp)
-                                    .height(24.dp)
-                                    .background(Color(0xFFA5D6A7))
+                                .width(1.dp)
+                                .height(24.dp)
+                                .background(Color(0xFFA5D6A7))
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Icon(
@@ -362,35 +328,59 @@ fun DashboardScreen(
                 }
             }
 
-            // Footer Slogan Section
+            // Divider Line
             item {
-                Column(
+                HorizontalDivider(
+                    color = Color(0xFFE8E0D5),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(vertical = 4.dp)
+                )
+            }
+
+            // Footer Section
+            item {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(top = 4.dp, bottom = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.footer_leaf),
+                        contentDescription = "Leaves",
+                        modifier = Modifier.size(56.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 6.dp)
+                    ) {
                         Text(
-                            text = "आपल्या आरोग्यासाठी, आपल्या माणसांसोबत",
-                            fontSize = 15.sp,
+                            text = "“स्वस्थ महाराष्ट्र,\nसमृद्ध समाज”",
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaroonPrimary
+                            color = MaroonPrimary,
+                            textAlign = TextAlign.Center,
+                            lineHeight = 24.sp
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Icon(
-                            imageVector = Icons.Default.Eco,
-                            contentDescription = null,
-                            tint = MaroonPrimary,
-                            modifier = Modifier.size(18.dp)
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Swasth Maharashtra, Samruddh Maharashtra",
+                            fontSize = 11.sp,
+                            color = TextSecondary,
+                            textAlign = TextAlign.Center
                         )
                     }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Swasth Maharashtra, Samruddh Maharashtra",
-                        fontSize = 12.sp,
-                        color = TextSecondary,
-                        textAlign = TextAlign.Center
+
+                    Image(
+                        painter = painterResource(id = R.drawable.footer_map),
+                        contentDescription = "Maharashtra Map",
+                        modifier = Modifier.size(80.dp),
+                        contentScale = ContentScale.Fit
                     )
                 }
             }
