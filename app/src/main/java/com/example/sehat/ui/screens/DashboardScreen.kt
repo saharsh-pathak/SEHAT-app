@@ -168,7 +168,7 @@ fun DashboardScreen(
                             .padding(18.dp)
                     ) {
                         Text(
-                            text = "START PATIENT SCREENING",
+                            text = "PATIENT TIMELINE & SCREENING",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFFE8C5C5),
@@ -176,20 +176,20 @@ fun DashboardScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Search or Create Patient",
+                            text = "Patient Timeline",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Enter ABHA ID, Name or Mobile Number",
+                            text = "View patient records, reports & sync status",
                             fontSize = 12.sp,
                             color = Color(0xFFF3E5E5)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // White Search Bar inside maroon card
+                        // White button inside maroon card
                         Surface(
                             shape = CircleShape,
                             color = Color.White,
@@ -203,16 +203,17 @@ fun DashboardScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Search,
-                                    contentDescription = "Search",
+                                    imageVector = Icons.Default.Timeline,
+                                    contentDescription = "Timeline",
                                     tint = MaroonPrimary,
                                     modifier = Modifier.size(22.dp)
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
-                                    text = "Search by ABHA ID / Name / Mobile Number",
-                                    fontSize = 13.sp,
-                                    color = Color(0xFF6B635B)
+                                    text = "Open Patient Timeline",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaroonPrimary
                                 )
                             }
                         }
