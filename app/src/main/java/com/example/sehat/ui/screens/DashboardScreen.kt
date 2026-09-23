@@ -362,11 +362,20 @@ fun DashboardScreen(
                     ) {
                         Text(
                             text = "“स्वस्थ महाराष्ट्र,\nसमृद्ध महाराष्ट्र”",
-                            fontSize = 18.sp,
+                            fontSize = 17.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaroonPrimary,
                             textAlign = TextAlign.Center,
-                            lineHeight = 24.sp
+                            lineHeight = 22.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "“Healthy Maharashtra,\nProsperous Maharashtra”",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaroonPrimary.copy(alpha = 0.85f),
+                            textAlign = TextAlign.Center,
+                            lineHeight = 16.sp
                         )
                     }
 

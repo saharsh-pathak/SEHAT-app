@@ -128,13 +128,14 @@ fun SehatNavGraph(
 
             PatientDetailsScreen(
                 state = patientState,
-                onStartScreeningClick = {
-                    careEpisodeViewModel.startEpisode(abhaId) { episodeId ->
+                onStartScreeningClick = { langName, langCode ->
+                    careEpisodeViewModel.setLanguage(langName, langCode)
+                    careEpisodeViewModel.startEpisode(abhaId) { _ ->
                         navController.navigate("symptoms/$abhaId")
                     }
                 },
                 onVoiceScreeningClick = {
-                    careEpisodeViewModel.startEpisode(abhaId) { episodeId ->
+                    careEpisodeViewModel.startEpisode(abhaId) { _ ->
                         navController.navigate("symptoms/$abhaId")
                     }
                 },
@@ -142,7 +143,7 @@ fun SehatNavGraph(
             )
         }
 
-        // Screen 3: Symptom Collection
+        // Screen 3: Symptom Collection (Step 1 of 4: Patient Voice Screening)
         composable(
             route = SehatRoutes.SYMPTOMS,
             arguments = listOf(navArgument("abhaId") { type = NavType.StringType }),
@@ -152,6 +153,8 @@ fun SehatNavGraph(
             val episodeState by careEpisodeViewModel.state.collectAsState()
 
             SymptomCollectionScreen(
+                initialLanguage = episodeState.selectedLanguage,
+                initialLanguageCode = episodeState.languageCode,
                 onNextClick = { transcript, manualText, selectedChips ->
                     careEpisodeViewModel.updateSymptoms(transcript, manualText, selectedChips)
                     navController.navigate("basic_tests/${episodeState.episodeId}")
@@ -160,26 +163,33 @@ fun SehatNavGraph(
             )
         }
 
-        // Screen 4: Basic Screening Tests
+        // Screen 4: Basic Screening Tests (Step 2 of 4: Medical Vitals & Dynamic Tests)
         composable(
             route = SehatRoutes.BASIC_TESTS,
             arguments = listOf(navArgument("episodeId") { type = NavType.LongType }),
             deepLinks = listOf(navDeepLink { uriPattern = "sehat://basic_tests/{episodeId}" })
         ) { backStackEntry ->
-            val episodeId = backStackEntry.arguments?.getLong("episodeId") ?: 0L
+            val episodeState by careEpisodeViewModel.state.collectAsState()
 
             BasicScreeningTestsScreen(
-                onNextClick = { bp, hr, spo2, temp, bg, hb, wt, ht, preg, mal, den, uri, tb, notes ->
-                    careEpisodeViewModel.updateVitalsAndTests(
-                        bp, hr, spo2, temp, bg, hb, wt, ht, preg, mal, den, uri, tb, notes
-                    )
-                    navController.navigate("triage_result/$episodeId")
+                initialBp = episodeState.bloodPressure,
+                initialHr = episodeState.heartRate,
+                initialSpo2 = episodeState.spo2,
+                initialTemp = episodeState.temperature,
+                initialHt = episodeState.height,
+                initialWt = episodeState.weight,
+                initialTests = episodeState.dynamicTests,
+                initialObservations = episodeState.clinicalObservations,
+                onNextClick = { bp, hr, spo2, temp, ht, wt, tests, obs ->
+                    careEpisodeViewModel.updateVitals(bp, hr, spo2, temp, wt, ht)
+                    careEpisodeViewModel.updateObservations(obs)
+                    navController.navigate("triage_result/${episodeState.episodeId}")
                 },
                 onBackClick = { navController.popBackStack() }
             )
         }
 
-        // Screen 5: Severity Assessment / Triage Result
+        // Screen 5: Severity Assessment / Screening Summary (Step 3 of 4)
         composable(
             route = SehatRoutes.TRIAGE_RESULT,
             arguments = listOf(navArgument("episodeId") { type = NavType.LongType }),
@@ -189,10 +199,10 @@ fun SehatNavGraph(
 
             TriageResultScreen(
                 state = episodeState,
-                onNotesChange = { careEpisodeViewModel.updateTriageNotes(it) },
-                onConfirmClick = {
+                onSaveDraft = { },
+                onSubmitScreening = {
                     careEpisodeViewModel.saveFullEpisode {
-                        navController.navigate("patient_timeline/${episodeState.abhaId}")
+                        navController.navigate("appointment_confirmation/${episodeState.episodeId}")
                     }
                 },
                 onBackClick = { navController.popBackStack() }
@@ -246,17 +256,22 @@ fun SehatNavGraph(
             )
         }
 
-        // Screen 8: Appointment Confirmation
+        // Screen 8: Screening Completed / Appointment Confirmation (Step 4 of 4)
         composable(
             route = SehatRoutes.APPOINTMENT_CONFIRMATION,
             arguments = listOf(navArgument("referralId") { type = NavType.LongType }),
             deepLinks = listOf(navDeepLink { uriPattern = "sehat://appointment_confirmation/{referralId}" })
         ) {
-            val appointment by referralViewModel.createdAppointment.collectAsState()
+            val episodeState by careEpisodeViewModel.state.collectAsState()
 
             AppointmentConfirmationScreen(
-                appointment = appointment,
-                onDoneClick = {
+                state = episodeState,
+                onViewPatientDetailsClick = {
+                    navController.navigate("patient_details/${episodeState.abhaId}") {
+                        popUpTo(SehatRoutes.DASHBOARD)
+                    }
+                },
+                onGoToDashboardClick = {
                     navController.navigate(SehatRoutes.DASHBOARD) {
                         popUpTo(SehatRoutes.DASHBOARD) { inclusive = true }
                     }

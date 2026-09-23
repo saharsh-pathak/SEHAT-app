@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.sehat.data.model.LabReportModel
 import com.example.sehat.data.model.PatientDetailsState
 import com.example.sehat.data.model.TimelineEvent
+import com.example.sehat.ui.components.LanguageSelectionModal
 import com.example.sehat.ui.components.PatientAvatar
 import com.example.sehat.ui.theme.*
 
@@ -34,12 +35,24 @@ import com.example.sehat.ui.theme.*
 @Composable
 fun PatientDetailsScreen(
     state: PatientDetailsState,
-    onStartScreeningClick: () -> Unit,
-    onVoiceScreeningClick: () -> Unit,
+    onStartScreeningClick: (languageName: String, languageCode: String) -> Unit,
+    onVoiceScreeningClick: () -> Unit = {},
     onBackClick: () -> Unit
 ) {
     // Tab Index: 0: First Screening (DEFAULT), 1: Patient Info, 2: Timeline, 3: Lab Report
     var selectedTab by remember(state.abhaId) { mutableIntStateOf(0) }
+    var showLanguageModal by remember { mutableStateOf(false) }
+
+    if (showLanguageModal) {
+        LanguageSelectionModal(
+            initialLanguage = "Marathi (मराठी)",
+            onDismiss = { showLanguageModal = false },
+            onStartScreening = { lang ->
+                showLanguageModal = false
+                onStartScreeningClick(lang.displayName, lang.id)
+            }
+        )
+    }
 
     Scaffold(
         containerColor = CreamBackground,
@@ -57,7 +70,7 @@ fun PatientDetailsScreen(
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     Button(
-                        onClick = onStartScreeningClick,
+                        onClick = { showLanguageModal = true },
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaroonPrimary,
