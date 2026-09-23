@@ -6,19 +6,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import com.example.sehat.navigation.SehatNavGraph
 import com.example.sehat.ui.theme.SehatTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val creamColor = Color.parseColor("#FAF8F5")
+        window.decorView.setBackgroundColor(creamColor)
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+            statusBarStyle = SystemBarStyle.light(creamColor, creamColor),
+            navigationBarStyle = SystemBarStyle.light(creamColor, creamColor)
         )
         setContent {
             SehatTheme {
-                SehatNavGraph()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    SehatNavGraph()
+                }
             }
         }
     }
