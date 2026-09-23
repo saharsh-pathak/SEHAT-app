@@ -454,10 +454,11 @@ fun TriageResultScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = observationsText,
+                            text = if (observationsText.isBlank()) "No clinical observations entered." else observationsText,
                             fontSize = 13.sp,
                             lineHeight = 18.sp,
-                            color = TextSecondary
+                            fontStyle = if (observationsText.isBlank()) androidx.compose.ui.text.font.FontStyle.Italic else androidx.compose.ui.text.font.FontStyle.Normal,
+                            color = if (observationsText.isBlank()) TextMuted else TextPrimary
                         )
                     }
                 }

@@ -46,7 +46,7 @@ data class CareEpisodeState(
         DynamicTestModel(testName = "Malaria RDT", result = "Negative", unit = "", remark = "Rapid antigen card"),
         DynamicTestModel(testName = "Dengue NS1", result = "Negative", unit = "", remark = "Rapid cassette")
     ),
-    val clinicalObservations: String = "Patient presented with severe fatigue, diaphoresis, and acute dizziness upon standing. Auscultation reveals bilateral coarse crepitations in lower lobes. Peripheral pulses bounding, heart sounds normal with tachycardia.",
+    val clinicalObservations: String = "",
     val probableCondition: String = "Stage 2 Hypertension with Acute Respiratory Distress",
     val severity: String = "High", // Low, Medium, High, Emergency
     val justification: String = "Systolic BP 160 mmHg and Diastolic BP 100 mmHg with SpO₂ 92%, combined with chest heaviness, severe dizziness, and crepitations warrants urgent clinical evaluation at Sub-District Hospital.",

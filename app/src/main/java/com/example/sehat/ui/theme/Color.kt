@@ -12,24 +12,27 @@ val CreamBackground = Color(0xFFFAF7F2)
 val CreamSurface = Color(0xFFF4EFE6)
 val SurfaceVariant = Color(0xFFEFE8DD)
 
-val TextPrimary = Color(0xFF2C2523)
-val TextSecondary = Color(0xFF6B635B)
-val TextMuted = Color(0xFF999086)
+val TextPrimary = Color(0xFF1E1917)
+val TextSecondary = Color(0xFF4A423B)
+val TextMuted = Color(0xFF6B635B)
 
-// Severity Colors
-val SeverityMild = Color(0xFF2E7D32)
-val SeverityMildBg = Color(0xFFE8F5E9)
+// Severity & Status Colors (High Contrast)
+val SeverityMild = Color(0xFF14532D)
+val SeverityMildBg = Color(0xFFDCFCE7)
+val SeverityCompletedBorder = Color(0xFF22C55E)
 
-val SeverityModerate = Color(0xFFED6C02)
-val SeverityModerateBg = Color(0xFFFFF4E5)
+val SeverityModerate = Color(0xFF92400E)
+val SeverityModerateBg = Color(0xFFFEF3C7)
+val SeverityPendingBorder = Color(0xFFF59E0B)
 
-val SeveritySevere = Color(0xFFD32F2F)
-val SeveritySevereBg = Color(0xFFFFEBEE)
+val SeveritySevere = Color(0xFF991B1B)
+val SeveritySevereBg = Color(0xFFFEE2E2)
 
-val SeverityEmergency = Color(0xFFC62828)
-val SeverityEmergencyBg = Color(0xFFFFCDD2)
+val SeverityEmergency = Color(0xFF7F1D1D)
+val SeverityEmergencyBg = Color(0xFFFEE2E2)
 
 // Stock Status
-val StockInStock = Color(0xFF2E7D32)
-val StockLowStock = Color(0xFFED6C02)
-val StockUnavailable = Color(0xFFD32F2F)
+val StockInStock = Color(0xFF166534)
+val StockLowStock = Color(0xFF92400E)
+val StockUnavailable = Color(0xFF991B1B)
+

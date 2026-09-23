@@ -38,6 +38,7 @@ fun DashboardScreen(
     onMedicineClick: () -> Unit,
     onFollowUpClick: () -> Unit,
     onLanguageClick: () -> Unit,
+    onPatientHistoryClick: () -> Unit = onSearchPatientClick,
     onEmergencyReferralClick: () -> Unit = onSearchPatientClick
 ) {
     Scaffold(
@@ -53,32 +54,20 @@ fun DashboardScreen(
         ) {
             item { Spacer(modifier = Modifier.height(2.dp)) }
 
-            // Top Header: Hamburger + Logo
+            // Top Header: Centered Logo
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp, bottom = 2.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = MaroonPrimary,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    // SEHAT Emblem Logo
                     Image(
                         painter = painterResource(id = R.drawable.sehat_logo),
                         contentDescription = "SEHAT Logo",
-                        modifier = Modifier.height(52.dp),
+                        modifier = Modifier.height(54.dp),
                         contentScale = ContentScale.Fit
                     )
-
-                    // Spacer to keep logo centered
-                    Spacer(modifier = Modifier.size(48.dp))
                 }
             }
 
@@ -249,7 +238,7 @@ fun DashboardScreen(
                             iconColor = Color(0xFFD97706),
                             iconBgColor = Color(0xFFFEF3C7),
                             cardBgColor = Color(0xFFFAF4E8),
-                            onClick = onSearchPatientClick,
+                            onClick = onPatientHistoryClick,
                             modifier = Modifier.weight(1f)
                         )
                         QuickActionCard(

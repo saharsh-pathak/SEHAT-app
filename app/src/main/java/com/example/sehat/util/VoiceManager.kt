@@ -103,23 +103,30 @@ class VoiceManager(private val context: Context) : TextToSpeech.OnInitListener, 
     }
 
     private fun startAndroidSpeechRecognizer(language: String) {
-        if (speechRecognizer == null) {
-            speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
-                setRecognitionListener(this@VoiceManager)
-            }
+        try {
+            speechRecognizer?.destroy()
+        } catch (_: Exception) {}
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context).apply {
+            setRecognitionListener(this@VoiceManager)
         }
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             val langTag = when (language.lowercase()) {
                 "marathi", "mr" -> "mr-IN"
                 "hindi", "hi" -> "hi-IN"
+                "english", "en" -> "en-IN"
                 else -> "hi-IN"
             }
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)
             putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         }
-        speechRecognizer?.startListening(intent)
-        onListeningStateChanged?.invoke(true)
+        try {
+            speechRecognizer?.startListening(intent)
+            onListeningStateChanged?.invoke(true)
+        } catch (e: Exception) {
+            onSpeechError?.invoke("Could not start speech recognition: ${e.message}")
+            onListeningStateChanged?.invoke(false)
+        }
     }
 
     fun stopListening() {

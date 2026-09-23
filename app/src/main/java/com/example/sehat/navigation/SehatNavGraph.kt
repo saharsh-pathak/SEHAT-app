@@ -15,6 +15,7 @@ import com.example.sehat.viewmodel.*
 object SehatRoutes {
     const val DASHBOARD = "dashboard"
     const val SEARCH_PATIENT = "search_patient"
+    const val PATIENT_HISTORY = "patient_history"
     const val PATIENT_DETAILS = "patient_details/{abhaId}"
     const val SYMPTOMS = "symptoms/{abhaId}"
     const val BASIC_TESTS = "basic_tests/{episodeId}"
@@ -56,6 +57,7 @@ fun SehatNavGraph(
                 pendingFollowUpsCount = pendingCount,
                 schedule = dashboardViewModel.todaySchedule,
                 onSearchPatientClick = { navController.navigate(SehatRoutes.SEARCH_PATIENT) },
+                onPatientHistoryClick = { navController.navigate(SehatRoutes.PATIENT_HISTORY) },
                 onMedicineClick = { navController.navigate(SehatRoutes.MEDICINE_AVAILABILITY) },
                 onFollowUpClick = { navController.navigate(SehatRoutes.FOLLOW_UP_TASKS) },
                 onLanguageClick = { navController.navigate(SehatRoutes.LANGUAGE_SELECTION) },
@@ -63,7 +65,7 @@ fun SehatNavGraph(
             )
         }
 
-        // Screen 2: Search Patient / Patient History
+        // Screen 2: Search Patient
         composable(
             route = SehatRoutes.SEARCH_PATIENT,
             deepLinks = listOf(navDeepLink { uriPattern = "sehat://search_patient" })
@@ -74,6 +76,7 @@ fun SehatNavGraph(
             SearchPatientScreen(
                 searchQuery = query,
                 patients = patients,
+                screenTitle = "Search Patient",
                 isEmergencyReferral = false,
                 onQueryChange = { patientViewModel.updateSearchQuery(it) },
                 onPatientSelect = { patient ->
@@ -81,7 +84,37 @@ fun SehatNavGraph(
                 },
                 onCreateAbha = { name, age, gender, village, aadhaar, mobile ->
                     patientViewModel.createAbhaPatient(name, age, gender, village, aadhaar, mobile) { newPatient ->
-                        navController.navigate("patient_details/${newPatient.abhaId}")
+                        careEpisodeViewModel.startEpisode(newPatient.abhaId) { episodeId ->
+                            navController.navigate("symptoms/${newPatient.abhaId}")
+                        }
+                    }
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // Screen: Patient History (View Patient History from Dashboard)
+        composable(
+            route = SehatRoutes.PATIENT_HISTORY,
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://patient_history" })
+        ) {
+            val query by patientViewModel.searchQuery.collectAsState()
+            val patients by patientViewModel.patients.collectAsState()
+
+            SearchPatientScreen(
+                searchQuery = query,
+                patients = patients,
+                screenTitle = "Patient History",
+                isEmergencyReferral = false,
+                onQueryChange = { patientViewModel.updateSearchQuery(it) },
+                onPatientSelect = { patient ->
+                    navController.navigate("patient_details/${patient.abhaId}")
+                },
+                onCreateAbha = { name, age, gender, village, aadhaar, mobile ->
+                    patientViewModel.createAbhaPatient(name, age, gender, village, aadhaar, mobile) { newPatient ->
+                        careEpisodeViewModel.startEpisode(newPatient.abhaId) { episodeId ->
+                            navController.navigate("symptoms/${newPatient.abhaId}")
+                        }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
@@ -99,6 +132,7 @@ fun SehatNavGraph(
             SearchPatientScreen(
                 searchQuery = query,
                 patients = patients,
+                screenTitle = "Emergency Referral",
                 isEmergencyReferral = true,
                 onQueryChange = { patientViewModel.updateSearchQuery(it) },
                 onPatientSelect = { patient ->
@@ -106,7 +140,9 @@ fun SehatNavGraph(
                 },
                 onCreateAbha = { name, age, gender, village, aadhaar, mobile ->
                     patientViewModel.createAbhaPatient(name, age, gender, village, aadhaar, mobile) { newPatient ->
-                        navController.navigate("patient_details/${newPatient.abhaId}")
+                        careEpisodeViewModel.startEpisode(newPatient.abhaId) { episodeId ->
+                            navController.navigate("symptoms/${newPatient.abhaId}")
+                        }
                     }
                 },
                 onBackClick = { navController.popBackStack() }
@@ -288,12 +324,14 @@ fun SehatNavGraph(
             val medicines by medicineViewModel.medicines.collectAsState()
             val selectedMed by medicineViewModel.selectedMedicine.collectAsState()
             val facilityStock by medicineViewModel.facilityStock.collectAsState()
+            val allFacilityStocks by medicineViewModel.allFacilityStocks.collectAsState()
 
             MedicineAvailabilityScreen(
                 searchQuery = query,
                 medicines = medicines,
                 selectedMedicine = selectedMed,
                 facilityStock = facilityStock,
+                allFacilityStocks = allFacilityStocks,
                 onQueryChange = { medicineViewModel.updateSearch(it) },
                 onMedicineClick = { medicineViewModel.selectMedicine(it) },
                 onDismissSheet = { medicineViewModel.selectMedicine(null) },

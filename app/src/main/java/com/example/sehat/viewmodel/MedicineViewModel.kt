@@ -33,6 +33,9 @@ class MedicineViewModel(application: Application) : AndroidViewModel(application
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val allFacilityStocks: StateFlow<List<Medicine>> = db.medicineDao().getAllFacilityStocks()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     fun updateSearch(query: String) { _searchQuery.value = query }
     fun selectMedicine(medicine: Medicine?) { _selectedMedicine.value = medicine }
 }

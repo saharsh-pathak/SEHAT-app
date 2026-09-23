@@ -1,6 +1,10 @@
 package com.example.sehat.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,8 +18,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -26,14 +28,12 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.sehat.ui.components.SehatButton
+import androidx.core.content.ContextCompat
 import com.example.sehat.ui.theme.*
 import com.example.sehat.util.SpeechStreamingManager
 import com.example.sehat.util.VoiceManager
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -63,15 +63,37 @@ fun SymptomCollectionScreen(
     val streamingTranscriptWords by streamingManager.streamingTranscriptWords.collectAsState()
     val highlightedTranscriptIdx by streamingManager.highlightedTranscriptWordIndex.collectAsState()
     val finalTranscript by streamingManager.finalTranscript.collectAsState()
-    val capturedSymptoms by streamingManager.capturedSymptoms.collectAsState()
 
     var manualNotes by remember { mutableStateOf("") }
     var isEditingTranscript by remember { mutableStateOf(false) }
     var editableTranscript by remember { mutableStateOf("") }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            streamingManager.toggleMicrophone()
+        } else {
+            Toast.makeText(context, "Microphone permission required for speech recognition", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun requestMicOrToggle() {
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasPermission) {
+            streamingManager.toggleMicrophone()
+        } else {
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
     // Start screening question on entry
     LaunchedEffect(Unit) {
-        streamingManager.startScreening(initialQuestionIndex = 2) // Starts at Question 2 of 12 as per mock/spec
+        streamingManager.startScreening(initialQuestionIndex = 2) // Starts at Question 2 of 12 as per spec
     }
 
     DisposableEffect(Unit) {
@@ -124,6 +146,7 @@ fun SymptomCollectionScreen(
                         Text(
                             text = "Step 1 of 4 • Voice Conversation",
                             fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
                             color = TextSecondary
                         )
                     }
@@ -132,7 +155,7 @@ fun SymptomCollectionScreen(
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = Color(0xFFFBEBEB),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, MaroonPrimary.copy(alpha = 0.3f))
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaroonPrimary.copy(alpha = 0.4f))
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -179,15 +202,15 @@ fun SymptomCollectionScreen(
                                 Toast.makeText(context, "Screening paused", Toast.LENGTH_SHORT).show()
                             },
                             shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF757575)),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFBDBDBD)),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF8C827A)),
                             modifier = Modifier
                                 .weight(0.4f)
                                 .height(50.dp)
                         ) {
                             Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("Stop", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text("Stop", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                         }
 
                         Button(
@@ -196,7 +219,7 @@ fun SymptomCollectionScreen(
                                 val outTranscript = if (isEditingTranscript) editableTranscript else finalTranscript.ifBlank {
                                     streamingTranscriptWords.joinToString(" ")
                                 }
-                                onNextClick(outTranscript, manualNotes, capturedSymptoms)
+                                onNextClick(outTranscript, manualNotes, emptyList())
                             },
                             shape = RoundedCornerShape(14.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -243,6 +266,7 @@ fun SymptomCollectionScreen(
                     Surface(
                         shape = RoundedCornerShape(8.dp),
                         color = Color(0xFFE8F0FE),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF93C5FD)),
                         modifier = Modifier.weight(1f)
                     ) {
                         Row(
@@ -252,13 +276,13 @@ fun SymptomCollectionScreen(
                             Icon(
                                 imageVector = Icons.Outlined.RecordVoiceOver,
                                 contentDescription = null,
-                                tint = Color(0xFF1967D2),
+                                tint = Color(0xFF1D4ED8),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Column {
-                                Text("Offline STT", fontSize = 10.sp, color = Color(0xFF5F6368))
-                                Text("IndicConformer", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1967D2))
+                                Text("Offline STT", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF374151))
+                                Text("IndicConformer", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D4ED8))
                             }
                         }
                     }
@@ -266,6 +290,7 @@ fun SymptomCollectionScreen(
                     Surface(
                         shape = RoundedCornerShape(8.dp),
                         color = Color(0xFFFCE8E6),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFFCA5A5)),
                         modifier = Modifier.weight(1f)
                     ) {
                         Row(
@@ -280,7 +305,7 @@ fun SymptomCollectionScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Column {
-                                Text("Offline TTS", fontSize = 10.sp, color = Color(0xFF5F6368))
+                                Text("Offline TTS", fontSize = 10.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF374151))
                                 Text("Kokoro Voice", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = MaroonPrimary)
                             }
                         }
@@ -293,6 +318,7 @@ fun SymptomCollectionScreen(
                 Card(
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE7E0D8)),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -315,8 +341,8 @@ fun SymptomCollectionScreen(
                             Text(
                                 text = "${((currentQIndex.toFloat() / totalQ) * 100).toInt()}% Complete",
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = TextSecondary
+                                fontWeight = FontWeight.Bold,
+                                color = TextPrimary
                             )
                         }
 
@@ -356,9 +382,9 @@ fun SymptomCollectionScreen(
                             Column {
                                 Text(
                                     text = if (isSpeaking) "Kokoro Speaking..." else "Follow-up Question:",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (isSpeaking) MaroonPrimary else TextSecondary
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaroonPrimary
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -371,7 +397,7 @@ fun SymptomCollectionScreen(
                                         Text(
                                             text = streamingManager.fullSpokenQuestionText.collectAsState().value,
                                             fontSize = 15.sp,
-                                            fontWeight = FontWeight.Medium,
+                                            fontWeight = FontWeight.SemiBold,
                                             color = TextPrimary
                                         )
                                     } else {
@@ -380,12 +406,12 @@ fun SymptomCollectionScreen(
                                             Text(
                                                 text = word,
                                                 fontSize = 15.sp,
-                                                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Medium,
+                                                fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.SemiBold,
                                                 color = if (isHighlighted) MaroonPrimary else TextPrimary,
                                                 modifier = if (isHighlighted) {
                                                     Modifier
-                                                        .background(Color(0xFFFBEBEB), RoundedCornerShape(4.dp))
-                                                        .padding(horizontal = 2.dp)
+                                                        .background(Color(0xFFFDE8E8), RoundedCornerShape(4.dp))
+                                                        .padding(horizontal = 3.dp)
                                                 } else Modifier
                                             )
                                         }
@@ -418,20 +444,20 @@ fun SymptomCollectionScreen(
                                     .size(96.dp)
                                     .clip(CircleShape)
                                     .background(
-                                        if (isListening) Color(0xFFC5221F).copy(alpha = 0.2f)
+                                        if (isListening) Color(0xFFDC2626).copy(alpha = 0.2f)
                                         else MaroonPrimary.copy(alpha = 0.2f)
                                     )
                             )
                         }
 
                         IconButton(
-                            onClick = { streamingManager.toggleMicrophone() },
+                            onClick = { requestMicOrToggle() },
                             modifier = Modifier
                                 .size(76.dp)
                                 .clip(CircleShape)
                                 .background(
                                     when {
-                                        isListening -> Color(0xFFC5221F)
+                                        isListening -> Color(0xFFDC2626)
                                         isSpeaking -> MaroonPrimary
                                         else -> MaroonPrimary
                                     }
@@ -450,26 +476,26 @@ fun SymptomCollectionScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = when {
-                            isListening -> "Listening to patient... (IndicConformer)"
+                            isListening -> "Listening to patient... (Live STT)"
                             isSpeaking -> "Speaking question... (Kokoro TTS)"
                             else -> "Tap microphone to speak"
                         },
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = when {
-                            isListening -> Color(0xFFC5221F)
+                            isListening -> Color(0xFFDC2626)
                             isSpeaking -> MaroonPrimary
-                            else -> TextSecondary
+                            else -> TextPrimary
                         }
                     )
                 }
             }
 
-            // Voice Control Secondary Buttons: Repeat, Skip, Next
+            // Voice Control Secondary Buttons: Repeat, Skip
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -479,22 +505,22 @@ fun SymptomCollectionScreen(
                         onClick = { streamingManager.repeatQuestion() },
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaroonPrimary),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, MaroonPrimary.copy(alpha = 0.5f))
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, MaroonPrimary.copy(alpha = 0.7f))
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Repeat Question", fontSize = 12.sp)
+                        Text("Repeat Question", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
 
                     OutlinedButton(
                         onClick = { streamingManager.skipQuestion() },
                         shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFD0C8B8))
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimary),
+                        border = androidx.compose.foundation.BorderStroke(1.5.dp, Color(0xFF8C827A))
                     ) {
                         Icon(Icons.Default.SkipNext, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Skip Question", fontSize = 12.sp)
+                        Text("Skip Question", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -506,7 +532,7 @@ fun SymptomCollectionScreen(
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     border = androidx.compose.foundation.BorderStroke(
                         1.dp,
-                        if (isListening) Color(0xFFC5221F).copy(alpha = 0.5f) else Color(0xFFE8E0D5)
+                        if (isListening) Color(0xFFDC2626).copy(alpha = 0.6f) else Color(0xFFE7E0D8)
                     ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                     modifier = Modifier.fillMaxWidth()
@@ -526,11 +552,11 @@ fun SymptomCollectionScreen(
                                     modifier = Modifier
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(if (isListening) Color(0xFFC5221F) else Color(0xFF2E7D32))
+                                        .background(if (isListening) Color(0xFFDC2626) else Color(0xFF15803D))
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = if (isListening) "Streaming STT Output..." else "Live Patient Response",
+                                    text = if (isListening) "Listening (Live STT)..." else "Patient Response Transcript",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = TextPrimary
@@ -545,6 +571,8 @@ fun SymptomCollectionScreen(
                                             editableTranscript = finalTranscript.ifBlank {
                                                 streamingTranscriptWords.joinToString(" ")
                                             }
+                                        } else {
+                                            streamingManager.updateManualTranscript(editableTranscript)
                                         }
                                         isEditingTranscript = !isEditingTranscript
                                     },
@@ -560,6 +588,7 @@ fun SymptomCollectionScreen(
                                     Text(
                                         text = if (isEditingTranscript) "Save" else "Edit",
                                         fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
                                         color = MaroonPrimary
                                     )
                                 }
@@ -574,7 +603,11 @@ fun SymptomCollectionScreen(
                                 onValueChange = { editableTranscript = it },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(10.dp),
-                                textStyle = LocalTextStyle.current.copy(fontSize = 14.sp)
+                                textStyle = LocalTextStyle.current.copy(
+                                    color = TextPrimary,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
                             )
                         } else {
                             // Live token by token streaming output
@@ -585,9 +618,10 @@ fun SymptomCollectionScreen(
                             ) {
                                 if (streamingTranscriptWords.isEmpty()) {
                                     Text(
-                                        text = "Patient voice transcript will appear here word-by-word...",
+                                        text = "Patient voice transcript will appear here as spoken...",
                                         fontSize = 13.sp,
-                                        color = TextMuted,
+                                        fontWeight = FontWeight.Medium,
+                                        color = TextSecondary,
                                         lineHeight = 18.sp
                                     )
                                 } else {
@@ -596,11 +630,11 @@ fun SymptomCollectionScreen(
                                         Text(
                                             text = word,
                                             fontSize = 14.sp,
-                                            fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
-                                            color = if (isHighlighted) Color(0xFFC5221F) else Color(0xFF1E1E1E),
+                                            fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.SemiBold,
+                                            color = if (isHighlighted) Color(0xFFDC2626) else TextPrimary,
                                             modifier = if (isHighlighted) {
                                                 Modifier
-                                                    .background(Color(0xFFFFEBEE), RoundedCornerShape(4.dp))
+                                                    .background(Color(0xFFFDE8E8), RoundedCornerShape(4.dp))
                                                     .padding(horizontal = 2.dp)
                                             } else Modifier
                                         )
@@ -612,55 +646,12 @@ fun SymptomCollectionScreen(
                 }
             }
 
-            // Captured Symptoms Chips (Live updated)
-            item {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Captured Symptoms (${capturedSymptoms.size})",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        capturedSymptoms.forEach { symptom ->
-                            Surface(
-                                shape = RoundedCornerShape(16.dp),
-                                color = Color(0xFFFBEBEB),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, MaroonPrimary.copy(alpha = 0.4f))
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.CheckCircle,
-                                        contentDescription = null,
-                                        tint = MaroonPrimary,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = symptom,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaroonPrimary
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
             // Green Informational Card
             item {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFE8F5E9),
+                    color = Color(0xFFDCFCE7),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF86EFAC)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -673,13 +664,13 @@ fun SymptomCollectionScreen(
                             modifier = Modifier
                                 .size(28.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFC8E6C9)),
+                                .background(Color(0xFFBBF7D0)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = null,
-                                tint = Color(0xFF2E7D32),
+                                tint = Color(0xFF15803D),
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -690,8 +681,8 @@ fun SymptomCollectionScreen(
                             text = "Screening automatically ends once all required clinical questions have been completed.",
                             fontSize = 12.sp,
                             lineHeight = 16.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF1B5E20)
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF14532D)
                         )
                     }
                 }

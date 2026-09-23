@@ -102,16 +102,22 @@ fun FollowUpTasksScreen(
                                     Text(task.taskTitle, fontSize = 13.sp, color = MaroonPrimary, fontWeight = FontWeight.SemiBold)
                                     Text("Due: ${task.dueDate} | Village: ${task.village}", fontSize = 12.sp, color = TextSecondary)
                                 }
-                                Button(
-                                    onClick = { onToggleTaskStatus(task) },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (task.status == "Pending") SeverityModerateBg else SeverityMildBg,
-                                        contentColor = if (task.status == "Pending") SeverityModerate else SeverityMild
-                                    ),
+                                Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                    color = if (task.status == "Pending") SeverityModerateBg else SeverityMildBg,
+                                    border = androidx.compose.foundation.BorderStroke(
+                                        1.dp,
+                                        if (task.status == "Pending") SeverityPendingBorder else SeverityCompletedBorder
+                                    ),
+                                    modifier = Modifier.clickable { onToggleTaskStatus(task) }
                                 ) {
-                                    Text(task.status, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        text = task.status,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (task.status == "Pending") SeverityModerate else SeverityMild,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    )
                                 }
                             }
 

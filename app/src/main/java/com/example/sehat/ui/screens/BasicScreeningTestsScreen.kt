@@ -42,7 +42,7 @@ fun BasicScreeningTestsScreen(
         DynamicTestModel(testName = "Malaria RDT", result = "Negative", unit = "", remark = "Rapid antigen card"),
         DynamicTestModel(testName = "Dengue NS1", result = "Negative", unit = "", remark = "Rapid cassette")
     ),
-    initialObservations: String = "Patient presented with severe fatigue, diaphoresis, and acute dizziness upon standing. Auscultation reveals bilateral coarse crepitations in lower lobes. Peripheral pulses bounding, heart sounds normal with tachycardia.",
+    initialObservations: String = "",
     onNextClick: (
         bp: String, hr: Int, spo2: Int, temp: Float, ht: Float, wt: Float,
         tests: List<DynamicTestModel>, observations: String
@@ -402,7 +402,7 @@ fun BasicScreeningTestsScreen(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("+ Add Test", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Add Test", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -511,18 +511,31 @@ fun BasicScreeningTestsScreen(
                             onValueChange = { observations = it },
                             placeholder = {
                                 Text(
-                                    "Enter additional observations made during physical examination...",
+                                    "Enter clinical observations made during examination...",
                                     fontSize = 13.sp,
                                     color = TextMuted
                                 )
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp),
+                                .heightIn(min = 120.dp, max = 220.dp),
                             shape = RoundedCornerShape(12.dp),
+                            minLines = 4,
+                            maxLines = 10,
+                            textStyle = androidx.compose.ui.text.TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal,
+                                color = TextPrimary,
+                                lineHeight = 20.sp
+                            ),
                             colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedTextColor = TextPrimary,
+                                unfocusedTextColor = TextPrimary,
+                                cursorColor = MaroonPrimary,
                                 focusedBorderColor = MaroonPrimary,
-                                unfocusedBorderColor = Color(0xFFEDE7DD)
+                                unfocusedBorderColor = Color(0xFFE0D8D0)
                             )
                         )
                     }
