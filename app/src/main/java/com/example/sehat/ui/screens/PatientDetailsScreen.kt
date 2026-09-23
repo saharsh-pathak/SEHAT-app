@@ -20,6 +20,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.sehat.data.model.LabReportModel
@@ -81,48 +83,56 @@ fun PatientDetailsScreen(
             }
         }
     ) { innerPadding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(4.dp)) }
-
-            // 1. Top Header Bar
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaroonPrimary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-
-                    Text(
-                        text = if (selectedTab == 0) "First Screening Report" else "Patient Details",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaroonPrimary
+            // Pinned Top Header Bar
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaroonPrimary,
+                        modifier = Modifier.size(24.dp)
                     )
+                }
 
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Outlined.MoreVert,
-                            contentDescription = "Options",
-                            tint = MaroonPrimary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                Text(
+                    text = if (selectedTab == 0) "First Screening Report" else "Patient Details",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaroonPrimary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(onClick = { }) {
+                    Icon(
+                        imageVector = Icons.Outlined.MoreVert,
+                        contentDescription = "Options",
+                        tint = MaroonPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
             }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
 
             // 2. Fixed Top Patient Summary Card with Fake Avatar & Sync Indicator
             item {
@@ -268,7 +278,10 @@ fun PatientDetailsScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
                                         Box(
                                             modifier = Modifier
                                                 .size(36.dp)
@@ -289,15 +302,20 @@ fun PatientDetailsScreen(
                                                 text = "First Screening Report",
                                                 fontSize = 16.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = MaroonPrimary
+                                                color = MaroonPrimary,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
                                             )
                                             Text(
                                                 text = report?.date ?: state.lastScreeningDate,
                                                 fontSize = 11.sp,
-                                                color = TextMuted
+                                                color = TextMuted,
+                                                maxLines = 1
                                             )
                                         }
                                     }
+
+                                    Spacer(modifier = Modifier.width(8.dp))
 
                                     // Synced / Local tick pill
                                     Surface(
@@ -356,17 +374,20 @@ fun PatientDetailsScreen(
                                             )
                                         }
                                         Spacer(modifier = Modifier.width(12.dp))
-                                        Column {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text("Overall Assessment", fontSize = 11.sp, color = TextSecondary)
+                                            Spacer(modifier = Modifier.height(2.dp))
                                             Text(
                                                 text = report?.overallRisk ?: "Low Risk",
                                                 fontSize = 15.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = bannerAccent
                                             )
+                                            Spacer(modifier = Modifier.height(2.dp))
                                             Text(
                                                 text = report?.riskDescription ?: "Initial health parameters within normal range.",
                                                 fontSize = 11.sp,
+                                                lineHeight = 15.sp,
                                                 color = TextSecondary
                                             )
                                         }
@@ -546,17 +567,36 @@ fun PatientDetailsScreen(
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
                                         color = Color(0xFFFAF7F2),
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.weight(1f).height(112.dp)
                                     ) {
                                         Column(
-                                            modifier = Modifier.padding(10.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(8.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
                                         ) {
                                             Icon(Icons.Default.LocalHospital, contentDescription = null, tint = MaroonPrimary, modifier = Modifier.size(20.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("Facility", fontSize = 10.sp, color = TextSecondary)
-                                            Text(report?.recommendedFacility ?: "PHC Khed", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                                            Text(report?.facilityDistance ?: "2.5 km", fontSize = 9.sp, color = TextMuted)
+                                            Text("Facility", fontSize = 10.sp, color = TextSecondary, textAlign = TextAlign.Center)
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = report?.recommendedFacility ?: "PHC Khed",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextPrimary,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = report?.facilityDistance ?: "2.5 km",
+                                                fontSize = 9.sp,
+                                                color = TextMuted,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1
+                                            )
                                         }
                                     }
 
@@ -564,17 +604,36 @@ fun PatientDetailsScreen(
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
                                         color = Color(0xFFFAF7F2),
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.weight(1f).height(112.dp)
                                     ) {
                                         Column(
-                                            modifier = Modifier.padding(10.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(8.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
                                         ) {
                                             Icon(Icons.Default.Person, contentDescription = null, tint = MaroonPrimary, modifier = Modifier.size(20.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("Doctor", fontSize = 10.sp, color = TextSecondary)
-                                            Text(report?.recommendedDoctor ?: "Dr. Deshmukh", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
-                                            Text(report?.doctorSpecialty ?: "General", fontSize = 9.sp, color = TextMuted)
+                                            Text("Doctor", fontSize = 10.sp, color = TextSecondary, textAlign = TextAlign.Center)
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = report?.recommendedDoctor ?: "Dr. Deshmukh",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = TextPrimary,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = report?.doctorSpecialty ?: "General",
+                                                fontSize = 9.sp,
+                                                color = TextMuted,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1
+                                            )
                                         }
                                     }
 
@@ -582,15 +641,19 @@ fun PatientDetailsScreen(
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
                                         color = Color(0xFFFAF7F2),
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.weight(1f).height(112.dp)
                                     ) {
                                         Column(
-                                            modifier = Modifier.padding(10.dp),
-                                            horizontalAlignment = Alignment.CenterHorizontally
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .padding(8.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
                                         ) {
                                             Icon(Icons.Default.Event, contentDescription = null, tint = MaroonPrimary, modifier = Modifier.size(20.dp))
                                             Spacer(modifier = Modifier.height(4.dp))
-                                            Text("Status", fontSize = 10.sp, color = TextSecondary)
+                                            Text("Status", fontSize = 10.sp, color = TextSecondary, textAlign = TextAlign.Center)
+                                            Spacer(modifier = Modifier.height(2.dp))
                                             Surface(
                                                 shape = RoundedCornerShape(6.dp),
                                                 color = Color(0xFFE8F5E9)
@@ -600,10 +663,17 @@ fun PatientDetailsScreen(
                                                     fontSize = 9.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     color = Color(0xFF2E7D32),
-                                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                                 )
                                             }
-                                            Text(report?.appointmentTime ?: "Completed", fontSize = 8.sp, color = TextMuted)
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = report?.appointmentTime ?: "Completed",
+                                                fontSize = 8.sp,
+                                                color = TextMuted,
+                                                textAlign = TextAlign.Center,
+                                                maxLines = 1
+                                            )
                                         }
                                     }
                                 }
@@ -871,6 +941,7 @@ fun PatientDetailsScreen(
         }
     }
 }
+}
 
 @Composable
 private fun VitalBox(
@@ -882,15 +953,17 @@ private fun VitalBox(
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = Color(0xFFFAF7F2),
-        modifier = modifier
+        modifier = modifier.height(64.dp)
     ) {
         Row(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(34.dp)
                     .clip(CircleShape)
                     .background(Color(0xFFF7EBEB)),
                 contentAlignment = Alignment.Center
@@ -899,21 +972,28 @@ private fun VitalBox(
                     imageVector = icon,
                     contentDescription = null,
                     tint = MaroonPrimary,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(17.dp)
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Column {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
                     text = label,
                     fontSize = 10.sp,
-                    color = TextSecondary
+                    color = TextSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = value,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = TextPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -991,10 +1071,23 @@ private fun DetailRow(label: String, value: String) {
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
-        Text(label, fontSize = 12.sp, color = TextSecondary)
-        Text(value, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+        Text(
+            text = label,
+            fontSize = 12.sp,
+            color = TextSecondary,
+            modifier = Modifier.weight(0.42f)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = value,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextPrimary,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(0.58f)
+        )
     }
 }
 
@@ -1009,10 +1102,14 @@ private fun TabButton(
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = if (isSelected) MaroonPrimary else Color.Transparent,
-        modifier = modifier.clickable { onClick() }
+        modifier = modifier
+            .height(38.dp)
+            .clickable { onClick() }
     ) {
         Row(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1020,14 +1117,16 @@ private fun TabButton(
                 imageVector = icon,
                 contentDescription = null,
                 tint = if (isSelected) Color.White else TextPrimary,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(13.dp)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(3.dp))
             Text(
                 text = text,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else TextPrimary
+                color = if (isSelected) Color.White else TextPrimary,
+                maxLines = 1,
+                letterSpacing = (-0.2).sp
             )
         }
     }

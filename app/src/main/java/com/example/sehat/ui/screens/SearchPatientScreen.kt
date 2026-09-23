@@ -1,17 +1,24 @@
 package com.example.sehat.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,6 +43,16 @@ fun SearchPatientScreen(
         Patient(abhaId = "9877 5658 4983", name = "SAHARSH", age = 19, gender = "Male", village = "Khed")
     )
 
+    val filteredPatients = remember(displayPatients, searchQuery) {
+        if (searchQuery.isBlank()) displayPatients
+        else displayPatients.filter {
+            it.name.contains(searchQuery, ignoreCase = true) ||
+            it.abhaId.contains(searchQuery, ignoreCase = true) ||
+            it.village.contains(searchQuery, ignoreCase = true) ||
+            (it.mobile?.contains(searchQuery, ignoreCase = true) == true)
+        }
+    }
+
     Scaffold(
         containerColor = CreamBackground
     ) { innerPadding ->
@@ -51,7 +68,7 @@ fun SearchPatientScreen(
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Top Header Bar: Back Button + "Timeline"
+                // Top Header Bar: Back Button + "Patient History"
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -65,23 +82,74 @@ fun SearchPatientScreen(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Timeline",
+                        text = "Patient History",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaroonPrimary
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Section Header: "Timeline" (No "View all")
-                Text(
-                    text = "Timeline",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextPrimary,
-                    modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
-                )
+                // Minimized Simple Search Box (in place of gray "Timeline" title)
+                Surface(
+                    shape = CircleShape,
+                    color = Color.White,
+                    shadowElevation = 1.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = MaroonPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Box(modifier = Modifier.weight(1f)) {
+                            if (searchQuery.isEmpty()) {
+                                Text(
+                                    text = "Search for Patient via ABHA ID / MOBILE NO. / NAME",
+                                    fontSize = 11.sp,
+                                    color = Color(0xFF8A827A),
+                                    maxLines = 1
+                                )
+                            }
+                            BasicTextField(
+                                value = searchQuery,
+                                onValueChange = onQueryChange,
+                                singleLine = true,
+                                textStyle = TextStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary
+                                ),
+                                cursorBrush = SolidColor(MaroonPrimary),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(
+                                onClick = { onQueryChange("") },
+                                modifier = Modifier.size(20.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Clear",
+                                    tint = TextSecondary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // Patient Cards List
                 LazyColumn(
@@ -89,15 +157,31 @@ fun SearchPatientScreen(
                     contentPadding = PaddingValues(bottom = 90.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(displayPatients) { patient ->
-                        // Determine sync state: green tick for synced, gray tick for not synced
-                        val isSynced = patient.abhaId.endsWith("12") || patient.abhaId.endsWith("33")
+                    if (filteredPatients.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 40.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No patients found matching \"$searchQuery\"",
+                                    fontSize = 13.sp,
+                                    color = TextMuted
+                                )
+                            }
+                        }
+                    } else {
+                        items(filteredPatients) { patient ->
+                            val isSynced = patient.abhaId.endsWith("12") || patient.abhaId.endsWith("33")
 
-                        PatientCard(
-                            patient = patient,
-                            isSynced = isSynced,
-                            onClick = { onPatientSelect(patient) }
-                        )
+                            PatientCard(
+                                patient = patient,
+                                isSynced = isSynced,
+                                onClick = { onPatientSelect(patient) }
+                            )
+                        }
                     }
                 }
             }
@@ -120,20 +204,20 @@ fun SearchPatientScreen(
                     lineTo(0f, size.height)
                     close()
                 }
-                drawPath(path = path, color = Color(0xFF852A2A).copy(alpha = 0.85f))
+                drawPath(path, color = MaroonPrimary.copy(alpha = 0.5f))
 
-                val subPath = Path().apply {
+                val frontPath = Path().apply {
                     moveTo(0f, size.height * 0.6f)
                     cubicTo(
-                        size.width * 0.4f, size.height * 0.3f,
-                        size.width * 0.7f, size.height * 0.8f,
+                        size.width * 0.4f, size.height * 0.8f,
+                        size.width * 0.7f, size.height * 0.3f,
                         size.width, size.height * 0.5f
                     )
                     lineTo(size.width, size.height)
                     lineTo(0f, size.height)
                     close()
                 }
-                drawPath(path = subPath, color = Color(0xFFD7CCC8).copy(alpha = 0.5f))
+                drawPath(frontPath, color = MaroonPrimary.copy(alpha = 0.75f))
             }
         }
     }
