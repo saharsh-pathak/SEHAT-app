@@ -31,17 +31,36 @@ import com.example.sehat.ui.theme.*
 fun SearchPatientScreen(
     searchQuery: String,
     patients: List<Patient>,
+    isEmergencyReferral: Boolean = false,
     onQueryChange: (String) -> Unit,
     onPatientSelect: (Patient) -> Unit,
     onCreateAbha: (name: String, age: Int, gender: String, village: String, aadhaar: String, mobile: String) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val displayPatients = if (patients.isNotEmpty()) patients else listOf(
-        Patient(abhaId = "1234 5678 9012", name = "Sita Devi", age = 34, gender = "Female", village = "Khed"),
-        Patient(abhaId = "9876 5432 1098", name = "Ramesh Pawar", age = 52, gender = "Male", village = "Khed"),
-        Patient(abhaId = "1111 2222 3333", name = "Lata Shinde", age = 28, gender = "Female", village = "Nandgaon"),
-        Patient(abhaId = "9877 5658 4983", name = "SAHARSH", age = 19, gender = "Male", village = "Khed")
+    val allDefaultPatients = listOf(
+        Patient(abhaId = "1234 5678 9012", name = "Sita Devi", age = 34, gender = "Female", village = "Khed", mobile = "9876543210"),
+        Patient(abhaId = "9876 5432 1098", name = "Ramesh Pawar", age = 52, gender = "Male", village = "Khed", mobile = "9876543200"),
+        Patient(abhaId = "1111 2222 3333", name = "Lata Shinde", age = 28, gender = "Female", village = "Nandgaon", mobile = "9876543211"),
+        Patient(abhaId = "5566 7788 9900", name = "Tukaram Shinde", age = 68, gender = "Male", village = "Khed", mobile = "9823456789"),
+        Patient(abhaId = "9877 5658 4983", name = "SAHARSH", age = 19, gender = "Male", village = "Khed", mobile = "9877565849")
     )
+
+    val highRiskAbhaIds = setOf("9876 5432 1098", "5566 7788 9900")
+
+    val basePatients = if (patients.isNotEmpty()) patients else allDefaultPatients
+
+    val displayPatients = if (isEmergencyReferral) {
+        val matched = basePatients.filter {
+            highRiskAbhaIds.contains(it.abhaId) || it.name.contains("Ramesh", ignoreCase = true) || it.name.contains("Tukaram", ignoreCase = true)
+        }
+        if (matched.any { it.name.contains("Tukaram", ignoreCase = true) }) {
+            matched
+        } else {
+            matched + allDefaultPatients[3]
+        }
+    } else {
+        basePatients
+    }
 
     val filteredPatients = remember(displayPatients, searchQuery) {
         if (searchQuery.isBlank()) displayPatients
@@ -68,7 +87,7 @@ fun SearchPatientScreen(
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Top Header Bar: Back Button + "Patient History"
+                // Top Header Bar: Back Button + Title
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -82,7 +101,7 @@ fun SearchPatientScreen(
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Patient History",
+                        text = if (isEmergencyReferral) "Emergency Referral" else "Patient History",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaroonPrimary
@@ -179,6 +198,7 @@ fun SearchPatientScreen(
                             PatientCard(
                                 patient = patient,
                                 isSynced = isSynced,
+                                showSyncIcon = !isEmergencyReferral,
                                 onClick = { onPatientSelect(patient) }
                             )
                         }

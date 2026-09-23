@@ -27,6 +27,7 @@ import com.example.sehat.ui.theme.TextSecondary
 fun PatientCard(
     patient: Patient,
     isSynced: Boolean = true,
+    showSyncIcon: Boolean = true,
     onClick: () -> Unit
 ) {
     Card(
@@ -76,23 +77,25 @@ fun PatientCard(
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            // Sync symbol: green tick for synced, gray tick for not synced
-            Surface(
-                shape = CircleShape,
-                color = if (isSynced) Color(0xFFE8F5E9) else Color(0xFFF2F2F2),
-                modifier = Modifier.size(30.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = if (isSynced) "Synced" else "Not Synced",
-                        tint = if (isSynced) Color(0xFF2E7D32) else Color(0xFF9E9E9E),
-                        modifier = Modifier.size(18.dp)
-                    )
+            if (showSyncIcon) {
+                // Sync symbol: green tick for synced, RED tick for not synced
+                Surface(
+                    shape = CircleShape,
+                    color = if (isSynced) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
+                    modifier = Modifier.size(30.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = if (isSynced) "Synced" else "Not Synced",
+                            tint = if (isSynced) Color(0xFF2E7D32) else Color(0xFFD32F2F),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+            }
 
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,

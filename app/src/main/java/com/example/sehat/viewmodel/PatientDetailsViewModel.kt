@@ -156,10 +156,12 @@ class PatientDetailsViewModel : ViewModel() {
         val isRamesh = targetAbha.contains("9876")
         val isLata = targetAbha.contains("1111")
         val isSaharsh = targetAbha.contains("4983")
-        val isSynced = !isRamesh && !isSaharsh
+        val isTukaram = targetAbha.contains("5566") || targetAbha.contains("7788")
+        val isSynced = !isRamesh && !isSaharsh && !isTukaram
 
         val patientName = when {
             isRamesh -> "Ramesh Pawar"
+            isTukaram -> "Tukaram Shinde"
             isLata -> "Lata Shinde"
             isSaharsh -> "SAHARSH"
             else -> "Sita Devi"
@@ -167,13 +169,14 @@ class PatientDetailsViewModel : ViewModel() {
 
         val patientAge = when {
             isRamesh -> 52
+            isTukaram -> 68
             isLata -> 28
             isSaharsh -> 19
             else -> 34
         }
 
         val patientGender = when {
-            isRamesh || isSaharsh -> "Male"
+            isRamesh || isSaharsh || isTukaram -> "Male"
             else -> "Female"
         }
 
@@ -185,17 +188,31 @@ class PatientDetailsViewModel : ViewModel() {
         val firstScreeningReport = when {
             isRamesh -> ScreeningReportModel(
                 date = "20 Aug 2025 • 09:30 AM",
-                overallRisk = "Moderate Risk",
-                riskDescription = "Elevated blood pressure with recurring dizziness. Requires doctor follow-up.",
-                primaryComplaints = listOf("Headache", "Dizziness", "Fatigue"),
-                likelyDiagnosis = "Stage 1 Essential Hypertension",
-                diagnosisNote = "Elevated systolic & diastolic readings. Lifestyle modification advised.",
+                overallRisk = "High Risk",
+                riskDescription = "Severe hypertension (160/100 mmHg) with recurring dizziness & chest pain. Emergency referral required.",
+                primaryComplaints = listOf("Severe Headache", "Chest Pain", "Dizziness"),
+                likelyDiagnosis = "Stage 2 Essential Hypertension",
+                diagnosisNote = "Urgent consultation and stabilization advised at PHC.",
                 recommendedFacility = "PHC Khed",
                 facilityDistance = "2.5 km away",
                 recommendedDoctor = "Dr. Rajesh Kulkarni",
                 doctorSpecialty = "Cardiology / Internal Medicine",
-                appointmentStatus = "Pending Confirmation",
-                appointmentTime = "02:00 PM, Tomorrow"
+                appointmentStatus = "Urgent Referral",
+                appointmentTime = "Immediate"
+            )
+            isTukaram -> ScreeningReportModel(
+                date = "22 Aug 2025 • 08:15 AM",
+                overallRisk = "High Risk",
+                riskDescription = "Low oxygen saturation (SpO2 88%) with acute breathlessness and chest tightness. Emergency care required.",
+                primaryComplaints = listOf("Breathlessness", "Chest Tightness", "Wheezing"),
+                likelyDiagnosis = "Acute Respiratory Distress / Severe COPD",
+                diagnosisNote = "Immediate oxygen therapy and emergency transfer advised.",
+                recommendedFacility = "PHC Khed / District Hospital",
+                facilityDistance = "2.5 km away",
+                recommendedDoctor = "Dr. Rajesh Kulkarni",
+                doctorSpecialty = "Pulmonology / Critical Care",
+                appointmentStatus = "Emergency Referral",
+                appointmentTime = "Immediate"
             )
             isLata -> ScreeningReportModel(
                 date = "15 Aug 2025 • 11:15 AM",

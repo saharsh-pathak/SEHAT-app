@@ -37,7 +37,8 @@ fun DashboardScreen(
     onSearchPatientClick: () -> Unit,
     onMedicineClick: () -> Unit,
     onFollowUpClick: () -> Unit,
-    onLanguageClick: () -> Unit
+    onLanguageClick: () -> Unit,
+    onEmergencyReferralClick: () -> Unit = onSearchPatientClick
 ) {
     Scaffold(
         containerColor = CreamBackground
@@ -258,7 +259,7 @@ fun DashboardScreen(
                             iconColor = Color(0xFFC5221F),
                             iconBgColor = Color(0xFFFFEBEE),
                             cardBgColor = Color(0xFFFDEAEA),
-                            onClick = onSearchPatientClick,
+                            onClick = onEmergencyReferralClick,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -360,19 +361,12 @@ fun DashboardScreen(
                             .padding(horizontal = 6.dp)
                     ) {
                         Text(
-                            text = "“स्वस्थ महाराष्ट्र,\nसमृद्ध समाज”",
+                            text = "“स्वस्थ महाराष्ट्र,\nसमृद्ध महाराष्ट्र”",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaroonPrimary,
                             textAlign = TextAlign.Center,
                             lineHeight = 24.sp
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "Swasth Maharashtra, Samruddh Maharashtra",
-                            fontSize = 11.sp,
-                            color = TextSecondary,
-                            textAlign = TextAlign.Center
                         )
                     }
 

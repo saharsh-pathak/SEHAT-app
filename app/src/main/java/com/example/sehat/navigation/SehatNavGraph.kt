@@ -25,6 +25,7 @@ object SehatRoutes {
     const val MEDICINE_AVAILABILITY = "medicine_availability"
     const val FOLLOW_UP_TASKS = "follow_up_tasks"
     const val LANGUAGE_SELECTION = "language_selection"
+    const val EMERGENCY_REFERRAL = "emergency_referral"
 }
 
 @Composable
@@ -57,11 +58,12 @@ fun SehatNavGraph(
                 onSearchPatientClick = { navController.navigate(SehatRoutes.SEARCH_PATIENT) },
                 onMedicineClick = { navController.navigate(SehatRoutes.MEDICINE_AVAILABILITY) },
                 onFollowUpClick = { navController.navigate(SehatRoutes.FOLLOW_UP_TASKS) },
-                onLanguageClick = { navController.navigate(SehatRoutes.LANGUAGE_SELECTION) }
+                onLanguageClick = { navController.navigate(SehatRoutes.LANGUAGE_SELECTION) },
+                onEmergencyReferralClick = { navController.navigate(SehatRoutes.EMERGENCY_REFERRAL) }
             )
         }
 
-        // Screen 2: Search Patient
+        // Screen 2: Search Patient / Patient History
         composable(
             route = SehatRoutes.SEARCH_PATIENT,
             deepLinks = listOf(navDeepLink { uriPattern = "sehat://search_patient" })
@@ -72,6 +74,32 @@ fun SehatNavGraph(
             SearchPatientScreen(
                 searchQuery = query,
                 patients = patients,
+                isEmergencyReferral = false,
+                onQueryChange = { patientViewModel.updateSearchQuery(it) },
+                onPatientSelect = { patient ->
+                    navController.navigate("patient_details/${patient.abhaId}")
+                },
+                onCreateAbha = { name, age, gender, village, aadhaar, mobile ->
+                    patientViewModel.createAbhaPatient(name, age, gender, village, aadhaar, mobile) { newPatient ->
+                        navController.navigate("patient_details/${newPatient.abhaId}")
+                    }
+                },
+                onBackClick = { navController.popBackStack() }
+            )
+        }
+
+        // Screen: Emergency Referral (High Risk patients only)
+        composable(
+            route = SehatRoutes.EMERGENCY_REFERRAL,
+            deepLinks = listOf(navDeepLink { uriPattern = "sehat://emergency_referral" })
+        ) {
+            val query by patientViewModel.searchQuery.collectAsState()
+            val patients by patientViewModel.patients.collectAsState()
+
+            SearchPatientScreen(
+                searchQuery = query,
+                patients = patients,
+                isEmergencyReferral = true,
                 onQueryChange = { patientViewModel.updateSearchQuery(it) },
                 onPatientSelect = { patient ->
                     navController.navigate("patient_details/${patient.abhaId}")

@@ -39,7 +39,7 @@ fun PatientDetailsScreen(
     onBackClick: () -> Unit
 ) {
     // Tab Index: 0: First Screening (DEFAULT), 1: Patient Info, 2: Timeline, 3: Lab Report
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember(state.abhaId) { mutableIntStateOf(0) }
 
     Scaffold(
         containerColor = CreamBackground,
@@ -346,9 +346,18 @@ fun PatientDetailsScreen(
                                 Spacer(modifier = Modifier.height(14.dp))
 
                                 // Overall Assessment Banner
-                                val isModerate = report?.overallRisk?.contains("Moderate") == true || report?.overallRisk?.contains("High") == true
-                                val bannerBg = if (isModerate) Color(0xFFFFF3E0) else Color(0xFFEFF7F0)
-                                val bannerAccent = if (isModerate) Color(0xFFE65100) else Color(0xFF2E7D32)
+                                val isHigh = report?.overallRisk?.contains("High", ignoreCase = true) == true
+                                val isModerate = report?.overallRisk?.contains("Moderate", ignoreCase = true) == true
+                                val bannerBg = when {
+                                    isHigh -> Color(0xFFFFEBEE)
+                                    isModerate -> Color(0xFFFFF3E0)
+                                    else -> Color(0xFFEFF7F0)
+                                }
+                                val bannerAccent = when {
+                                    isHigh -> Color(0xFFC62828)
+                                    isModerate -> Color(0xFFE65100)
+                                    else -> Color(0xFF2E7D32)
+                                }
 
                                 Surface(
                                     shape = RoundedCornerShape(14.dp),
