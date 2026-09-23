@@ -13,6 +13,7 @@ import com.example.sehat.speech.SherpaSTTEngine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.util.Locale
@@ -22,6 +23,8 @@ class VoiceManager(private val context: Context) : TextToSpeech.OnInitListener, 
     private var tts: TextToSpeech? = TextToSpeech(context.applicationContext, this)
     private var speechRecognizer: SpeechRecognizer? = null
     private var isTtsReady = false
+    private var pendingSpeechText: String? = null
+    private var pendingSpeechLang: String? = null
 
     private val modelManager = ModelManager(context)
     private val audioRecorder = AudioRecorder()
@@ -34,25 +37,76 @@ class VoiceManager(private val context: Context) : TextToSpeech.OnInitListener, 
     var onSpeechError: ((String) -> Unit)? = null
     var onListeningStateChanged: ((Boolean) -> Unit)? = null
     var onDownloadProgress: ((Int, String) -> Unit)? = null
+    var onSpeechComplete: (() -> Unit)? = null
+    var onSpeechStart: (() -> Unit)? = null
 
     override fun onInit(status: Int) {
         if (status == TextToSpeech.SUCCESS) {
             isTtsReady = true
+            setupUtteranceListener()
+            val text = pendingSpeechText
+            val lang = pendingSpeechLang
+            if (!text.isNullOrBlank() && !lang.isNullOrBlank()) {
+                pendingSpeechText = null
+                pendingSpeechLang = null
+                speak(text, lang)
+            }
+        } else {
+            onSpeechError?.invoke("Text-to-Speech initialization failed ($status)")
         }
     }
 
+    private fun setupUtteranceListener() {
+        tts?.setOnUtteranceProgressListener(object : android.speech.tts.UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {
+                scope.launch { onSpeechStart?.invoke() }
+            }
+
+            override fun onDone(utteranceId: String?) {
+                scope.launch { onSpeechComplete?.invoke() }
+            }
+
+            @Deprecated("Deprecated in Java")
+            override fun onError(utteranceId: String?) {
+                scope.launch { onSpeechComplete?.invoke() }
+            }
+
+            override fun onError(utteranceId: String?, errorCode: Int) {
+                scope.launch { onSpeechComplete?.invoke() }
+            }
+        })
+    }
+
     fun speak(text: String, language: String) {
-        if (!isTtsReady || text.isBlank()) return
-        val locale = when (language.lowercase()) {
+        if (text.isBlank()) return
+        if (!isTtsReady) {
+            pendingSpeechText = text
+            pendingSpeechLang = language
+            return
+        }
+
+        // Only Hindi and Marathi STT/TTS work, rest all just for show (fallback to Hindi)
+        val targetLocale = when (language.lowercase()) {
             "marathi", "mr" -> Locale("mr", "IN")
             "hindi", "hi" -> Locale("hi", "IN")
             else -> Locale("hi", "IN")
         }
-        tts?.language = locale
+
+        var result = tts?.setLanguage(targetLocale)
+        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            // Fallback to Hindi if Marathi voice data is missing on the phone
+            result = tts?.setLanguage(Locale("hi", "IN"))
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                tts?.setLanguage(Locale.getDefault())
+            }
+        }
+        tts?.setSpeechRate(0.95f)
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "SEHAT_TTS")
     }
 
     fun stopSpeak() {
+        pendingSpeechText = null
+        pendingSpeechLang = null
         tts?.stop()
     }
 
@@ -114,7 +168,6 @@ class VoiceManager(private val context: Context) : TextToSpeech.OnInitListener, 
             val langTag = when (language.lowercase()) {
                 "marathi", "mr" -> "mr-IN"
                 "hindi", "hi" -> "hi-IN"
-                "english", "en" -> "en-IN"
                 else -> "hi-IN"
             }
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, langTag)

@@ -1,25 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <group
-        android:scaleX="0.72"
-        android:scaleY="0.72"
-        android:pivotX="54"
-        android:pivotY="54">
-        <path
-            android:fillColor="#FFFFFF"
-            android:pathData="M38,28 H64 L76,40 V72 C76,75.3 73.3,78 70,78 H40 C36.7,78 34,75.3 34,72 V32 C34,29.8 35.8,28 38,28 Z" />
-        <path
-            android:fillColor="#6750A4"
-            android:pathData="M64,28 L76,40 L68,40 C64.9,40 64,39.1 64,36 Z" />
-        <path
-            android:fillColor="#00000000"
-            android:strokeColor="#6750A4"
-            android:strokeWidth="2.5"
-            android:strokeLineCap="round"
-            android:pathData="M46,50 H66 M46,58 H66 M46,66 H56" />
-    </group>
-</vector>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:width="74dp"
+        android:height="63dp"
+        android:gravity="center"
+        android:drawable="@drawable/sehat_logo" />
+</layer-list>

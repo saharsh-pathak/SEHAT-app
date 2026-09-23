@@ -70,9 +70,10 @@ fun SymptomCollectionScreen(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            streamingManager.toggleMicrophone()
+            streamingManager.startScreening(initialQuestionIndex = 1)
         } else {
-            Toast.makeText(context, "Microphone permission required for speech recognition", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Microphone permission recommended for voice screening", Toast.LENGTH_SHORT).show()
+            streamingManager.startScreening(initialQuestionIndex = 1)
         }
     }
 
@@ -89,9 +90,17 @@ fun SymptomCollectionScreen(
         }
     }
 
-    // Start screening question on entry
+    // Check permission and start screening question on entry
     LaunchedEffect(Unit) {
-        streamingManager.startScreening(initialQuestionIndex = 2) // Starts at Question 2 of 12 as per spec
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+        if (!hasPermission) {
+            permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+        } else {
+            streamingManager.startScreening(initialQuestionIndex = 1)
+        }
     }
 
     DisposableEffect(Unit) {
@@ -630,6 +639,66 @@ fun SymptomCollectionScreen(
                                         )
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+
+                // Primary Actions: Next Question & Proceed to Clinical Tests
+                item {
+                    val isLastQuestion = currentQIndex >= totalQ
+
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                if (isLastQuestion) {
+                                    streamingManager.recordCurrentAnswer()
+                                    val finalTrans = streamingManager.getAggregatedTranscript().ifBlank { finalTranscript }
+                                    onNextClick(finalTrans, manualNotes, emptyList())
+                                } else {
+                                    streamingManager.nextQuestion()
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaroonPrimary)
+                        ) {
+                            Text(
+                                text = if (isLastQuestion) "Proceed to Clinical Tests (तपासणीकडे जा) →" else "Next Question (पुढील प्रश्न) →",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+
+                        if (!isLastQuestion) {
+                            OutlinedButton(
+                                onClick = {
+                                    streamingManager.recordCurrentAnswer()
+                                    val finalTrans = streamingManager.getAggregatedTranscript().ifBlank { finalTranscript }
+                                    onNextClick(finalTrans, manualNotes, emptyList())
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = Color.White,
+                                    contentColor = MaroonPrimary
+                                ),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, MaroonPrimary)
+                            ) {
+                                Text(
+                                    text = "Finish Voice & Proceed to Tests (थेट तपासणीकडे जा)",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaroonPrimary
+                                )
                             }
                         }
                     }

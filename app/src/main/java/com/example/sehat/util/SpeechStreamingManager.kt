@@ -145,6 +145,9 @@ class SpeechStreamingManager(
 
     private var questionStreamingJob: Job? = null
 
+    private val _collectedAnswers = MutableStateFlow<Map<Int, String>>(emptyMap())
+    val collectedAnswers: StateFlow<Map<Int, String>> = _collectedAnswers.asStateFlow()
+
     init {
         voiceManager.onSpeechResults = { text ->
             if (text.isNotBlank()) {
@@ -157,6 +160,17 @@ class SpeechStreamingManager(
         }
         voiceManager.onSpeechError = { _ ->
             _isListening.value = false
+        }
+        voiceManager.onSpeechComplete = {
+            coroutineScope.launch {
+                _isSpeaking.value = false
+                _highlightedQuestionWordIndex.value = -1
+                // Auto-transition to microphone once question reading finishes
+                delay(300)
+                if (!_isListening.value) {
+                    startListening()
+                }
+            }
         }
     }
 
@@ -178,7 +192,7 @@ class SpeechStreamingManager(
         return when (lang.lowercase()) {
             "mr", "marathi" -> q.textMr
             "hi", "hindi" -> q.textHi
-            else -> q.textEn
+            else -> q.textHi // Rest all just for show; use Hindi for STT/TTS
         }
     }
 
@@ -192,6 +206,9 @@ class SpeechStreamingManager(
         _isListening.value = false
 
         _currentQuestionIndex.value = questionNum.coerceIn(1, totalQuestions)
+        _finalTranscript.value = ""
+        _streamingTranscriptWords.value = emptyList()
+
         val q = getCurrentQuestion()
         val textToSpeak = getQuestionTextForLang(q, _selectedLanguage.value)
         _fullSpokenQuestionText.value = textToSpeak
@@ -202,7 +219,7 @@ class SpeechStreamingManager(
 
         _isSpeaking.value = true
 
-        // Start Kokoro TTS
+        // Start Kokoro TTS (speaks in Marathi or Hindi)
         voiceManager.speak(textToSpeak, _selectedLanguage.value)
 
         questionStreamingJob = coroutineScope.launch {
@@ -211,14 +228,16 @@ class SpeechStreamingManager(
                 visibleTokens.add(words[i])
                 _streamingQuestionWords.value = visibleTokens.toList()
                 _highlightedQuestionWordIndex.value = i
-                delay(120)
+                delay(140)
             }
             _highlightedQuestionWordIndex.value = -1
-            _isSpeaking.value = false
 
-            // Auto-transition to real mic listening once question reading finishes
-            delay(300)
-            startListening()
+            // Fallback timeout in case device TTS engine does not report completion event
+            delay(1800)
+            if (_isSpeaking.value) {
+                _isSpeaking.value = false
+                startListening()
+            }
         }
     }
 
@@ -253,16 +272,37 @@ class SpeechStreamingManager(
         streamQuestion(_currentQuestionIndex.value)
     }
 
-    fun skipQuestion() {
+    fun skipQuestion(): Boolean {
+        return nextQuestion()
+    }
+
+    fun nextQuestion(): Boolean {
+        recordCurrentAnswer()
         if (_currentQuestionIndex.value < totalQuestions) {
             streamQuestion(_currentQuestionIndex.value + 1)
+            return true
+        }
+        return false
+    }
+
+    fun recordCurrentAnswer() {
+        val transcript = _finalTranscript.value.trim()
+        if (transcript.isNotBlank()) {
+            val updated = _collectedAnswers.value.toMutableMap()
+            updated[_currentQuestionIndex.value] = transcript
+            _collectedAnswers.value = updated
         }
     }
 
-    fun nextQuestion() {
-        if (_currentQuestionIndex.value < totalQuestions) {
-            streamQuestion(_currentQuestionIndex.value + 1)
-        }
+    fun getAggregatedTranscript(): String {
+        val answers = _collectedAnswers.value
+        if (answers.isEmpty()) return _finalTranscript.value
+        return answers.entries
+            .sortedBy { it.key }
+            .joinToString(separator = "\n") { (qIdx, ans) ->
+                val qText = getQuestionTextForLang(SCREENING_QUESTIONS[(qIdx - 1).coerceIn(0, SCREENING_QUESTIONS.size - 1)], _selectedLanguage.value)
+                "Q$qIdx: $qText -> $ans"
+            }
     }
 
     fun stopScreening() {
