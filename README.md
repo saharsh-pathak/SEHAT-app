@@ -22,12 +22,38 @@ The platform provides offline clinical screening, AI-driven digital triage, ABHA
 
 ---
 
-## 📱 Interface & Screenshots
+## 📱 Application UI & Workflow Showcase
 
-| 1. ASHA Worker Dashboard | 2. Clinical Screening Workflow | 3. AI Triage & Referral Escalation |
+### 🏠 ASHA Worker Dashboard & Patient Intake Hub
+*Operational dashboard with multilingual toggle (Marathi/Hindi/English), un-synced case alerts, patient search, and quick clinical actions.*
+
+| Dashboard Home | Patient Directory & Queue | ABHA Search & Registration |
 | :---: | :---: | :---: |
-| <img src="ui-ref/screen1_dashboard.png" width="300" alt="ASHA Worker Dashboard"/> | <img src="ui-ref/screen2_screening.png" width="300" alt="Clinical Screening Workflow"/> | <img src="ui-ref/screen3_triage_referral.png" width="300" alt="AI Triage and Referral"/> |
-| *Bilingual operational hub, un-synced queue status & quick actions* | *5-stage vital signs capture, voice transcription (STT/TTS)* | *Automated risk severity matrix, destination facility & queue token* |
+| <img src="UI/screenshot_01.jpeg" width="270" alt="Dashboard Home"/> | <img src="UI/screenshot_02.jpeg" width="270" alt="Patient Directory"/> | <img src="UI/screenshot_03.jpeg" width="270" alt="ABHA Registration"/> |
+
+### 🩺 5-Stage Guided Clinical Screening Workflow
+*Step-by-step vitals recording, real-time STT voice symptom transcription, rapid diagnostic test entries, and automated clinical justification.*
+
+| 1. Multilingual STT Symptoms | 2. Vital Signs Capture | 3. Rapid Diagnostic Tests | 4. AI Risk & Severity Matrix |
+| :---: | :---: | :---: | :---: |
+| <img src="UI/screenshot_04.jpeg" width="210" alt="STT Symptoms"/> | <img src="UI/screenshot_05.jpeg" width="210" alt="Vitals Capture"/> | <img src="UI/screenshot_06.jpeg" width="210" alt="Diagnostics"/> | <img src="UI/screenshot_07.jpeg" width="210" alt="AI Risk Matrix"/> |
+
+### 🚑 Emergency Escalation, Automated Referral & Queue Token
+*Instant destination hospital routing based on severity level, automated queue token allocation, and medicine stock visibility.*
+
+| Priority Referral Booking | Queue Token & Consultation Summary | Longitudinal Patient Timeline | Facility Medicine Inventory |
+| :---: | :---: | :---: | :---: |
+| <img src="UI/screenshot_08.jpeg" width="210" alt="Referral Booking"/> | <img src="UI/screenshot_09.jpeg" width="210" alt="Queue Token"/> | <img src="UI/screenshot_10.jpeg" width="210" alt="Patient Timeline"/> | <img src="UI/screenshot_11.jpeg" width="210" alt="Medicine Stock"/> |
+
+### 📋 Complete Mobile Interface Gallery
+
+| Screen 12 | Screen 13 | Screen 14 | Screen 15 |
+| :---: | :---: | :---: | :---: |
+| <img src="UI/screenshot_12.jpeg" width="200" alt="Screen 12"/> | <img src="UI/screenshot_13.jpeg" width="200" alt="Screen 13"/> | <img src="UI/screenshot_14.jpeg" width="200" alt="Screen 14"/> | <img src="UI/screenshot_15.jpeg" width="200" alt="Screen 15"/> |
+
+| Screen 16 | Screen 17 | Screen 18 | Screen 19 |
+| :---: | :---: | :---: | :---: |
+| <img src="UI/screenshot_16.jpeg" width="200" alt="Screen 16"/> | <img src="UI/screenshot_17.jpeg" width="200" alt="Screen 17"/> | <img src="UI/screenshot_18.jpeg" width="200" alt="Screen 18"/> | <img src="UI/screenshot_19.jpeg" width="200" alt="Screen 19"/> |
 
 ---
 
@@ -165,7 +191,7 @@ SEHAT-app/
 │   │   │   └── theme/        # SEHAT color palette & typography
 │   │   └── viewmodel/        # Feature ViewModels
 │   └── build.gradle.kts
-├── ui-ref/                   # UI mockups & reference screenshots
+├── UI/                       # Application UI screenshots & mockups
 ├── PRD.md                    # Detailed Product Requirement Document
 ├── build.gradle.kts
 └── settings.gradle.kts
