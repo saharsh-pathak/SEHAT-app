@@ -18,7 +18,7 @@
 
 **SEHAT** (Smart Edge Healthcare Access & Telemedicine Platform) is a state-of-the-art, offline-first mobile platform designed for Maharashtra's rural public healthcare network. Built specifically for frontline health workers (**ASHA Workers, ANMs, and CHOs**), SEHAT bridges rural communities with Primary Health Centers (PHC), Community Health Centers (CHC), and District Hospitals.
 
-The platform provides offline clinical screening, AI-driven digital triage, ABHA-linked longitudinal health records, automated facility appointments, emergency escalation, and real-time voice interactions in **Marathi, Hindi, and English**.
+The platform provides offline clinical screening, AI-driven digital triage, ABHA-linked longitudinal health records, automated facility appointments, emergency escalation, and real-time voice interactions in **Their Regional Language**.
 
 ---
 
@@ -43,7 +43,7 @@ The platform provides offline clinical screening, AI-driven digital triage, ABHA
 
 ### 🗣️ Multilingual Voice Assistance (STT & TTS)
 * Live Speech-To-Text (STT) transcription for rapid symptom entry during patient intake.
-* Text-To-Speech (TTS) readout in **Marathi (mr-IN)**, **Hindi (hi-IN)**, and **English (en-IN)** to assist low-literacy users.
+* Text-To-Speech (TTS) readout in **Their Regional Language** to assist low-literacy users.
 
 ### 🩺 5-Stage Guided Clinical Care Workflow
 1. **Patient Search & ABHA Creation**: Search existing profiles or generate instant ABHA via Aadhaar verification.
